@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="600" viewBox="0 0 1080 600" role="img" aria-labelledby="title desc">
+  <title id="title">Table user</title>
+  <desc id="desc">Colonnes, types SQL et contraintes de la table user.</desc>
+  <rect width="1080" height="600" fill="#F5F6F8"/>
+  <rect x="20" y="20" width="1040" height="560" rx="16" fill="#FFFFFF" stroke="#C9CDD3"/>
+  <path d="M36 20h1008a16 16 0 0 1 16 16v64H20V36a16 16 0 0 1 16-16z" fill="#20242A"/>
+  <rect x="20" y="94" width="1040" height="6" fill="#F2C94C"/>
+  <text x="50" y="70" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">USER</text>
+  <rect x="40" y="116" width="1000" height="44" rx="7" fill="#FFF6CE"/>
+  <g fill="#20242A" font-family="Segoe UI, Arial, sans-serif" font-size="17">
+    <text x="60" y="145" font-weight="700">COLONNE</text><text x="350" y="145" font-weight="700">TYPE SQL</text><text x="600" y="145" font-weight="700">CONTRAINTES</text>
+    <text x="60" y="202" font-weight="700">id</text><text x="350" y="202">INT</text><text x="600" y="202">PK · AUTO_INCREMENT</text>
+    <text x="60" y="254" font-weight="700">email</text><text x="350" y="254">VARCHAR(180)</text><text x="600" y="254">NOT NULL · UNIQUE</text>
+    <text x="60" y="306" font-weight="700">roles</text><text x="350" y="306">JSON</text><text x="600" y="306">NOT NULL</text>
+    <text x="60" y="358" font-weight="700">password</text><text x="350" y="358">VARCHAR(255)</text><text x="600" y="358">NOT NULL</text>
+    <text x="60" y="410" font-weight="700">pseudo</text><text x="350" y="410">VARCHAR(100)</text><text x="600" y="410">NOT NULL · UNIQUE</text>
+    <text x="60" y="462" font-weight="700">avatar_filename</text><text x="350" y="462">VARCHAR(255)</text><text x="600" y="462">NULL</text>
+    <text x="60" y="514" font-weight="700">is_banned</text><text x="350" y="514">BOOLEAN</text><text x="600" y="514">NOT NULL · DEFAULT FALSE</text>
+  </g>
+  <g stroke="#E5E7EB">
+    <line x1="40" y1="218" x2="1040" y2="218"/><line x1="40" y1="270" x2="1040" y2="270"/>
+    <line x1="40" y1="322" x2="1040" y2="322"/><line x1="40" y1="374" x2="1040" y2="374"/>
+    <line x1="40" y1="426" x2="1040" y2="426"/><line x1="40" y1="478" x2="1040" y2="478"/>
+    <line x1="40" y1="530" x2="1040" y2="530"/>
+  </g>
+</svg>
