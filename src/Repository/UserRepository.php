@@ -57,4 +57,34 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    /**
+     * Recherche les utilisateurs par pseudo ou adresse e-mail.
+     *
+     * @return User[]
+     */
+    public function findForAdmin(
+        ?string $search
+    ): array {
+        $queryBuilder = $this->createQueryBuilder('user')
+            ->orderBy('user.pseudo', 'ASC');
+
+        $search = trim((string) $search);
+
+        if ($search !== '') {
+            $queryBuilder
+                ->andWhere(
+                    'LOWER(user.pseudo) LIKE LOWER(:search)
+                    OR LOWER(user.email) LIKE LOWER(:search)'
+                )
+                ->setParameter(
+                    'search',
+                    '%'.$search.'%'
+                );
+        }
+
+        return $queryBuilder
+            ->getQuery()
+            ->getResult();
+    }
 }

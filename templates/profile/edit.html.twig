@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon profil - Bolonews{% endblock %}
+
+{% block body %}
+    <main>
+        <header>
+            <h1>Modifier mon profil</h1>
+            <p>Mettez à jour les informations de votre compte.</p>
+        </header>
+
+        <section aria-labelledby="profile-edit-title">
+            <h2 id="profile-edit-title">Mes informations</h2>
+
+            <div>
+                {% if user.avatarFilename %}
+                    <img
+                        src="{{ asset(
+                            'images/avatars/' ~ user.avatarFilename
+                        ) }}"
+                        alt="Avatar actuel de {{ user.pseudo }}"
+                    >
+                {% else %}
+                    <span aria-hidden="true">
+                        {{ user.pseudo|slice(0, 2)|upper }}
+                    </span>
+                {% endif %}
+
+                <p>Avatar actuel</p>
+            </div>
+
+            {{ form_start(profileForm) }}
+
+                {{ form_errors(profileForm) }}
+
+                {{ form_row(profileForm.pseudo, {
+                    label: 'Pseudonyme'
+                }) }}
+
+                {{ form_row(profileForm.avatar, {
+                    label: 'Choisir une nouvelle image',
+                    help: 'JPG ou PNG, 2 Mo maximum. Laissez vide pour conserver l’image actuelle.'
+                }) }}
+
+                {{ form_row(profileForm.email, {
+                    label: 'Adresse e-mail'
+                }) }}
+
+                {{ form_errors(profileForm.newPassword) }}
+
+                {{ form_row(
+                    profileForm.newPassword.first,
+                    {
+                        label: 'Nouveau mot de passe',
+                        help: 'Laissez ce champ vide pour conserver le mot de passe actuel.'
+                    }
+                ) }}
+
+                {{ form_row(
+                    profileForm.newPassword.second,
+                    {
+                        label: 'Confirmation du nouveau mot de passe'
+                    }
+                ) }}
+
+                <button type="submit">
+                    Enregistrer les modifications
+                </button>
+
+            {{ form_end(profileForm) }}
+
+            <a href="{{ path('app_profile_index') }}">
+                Annuler et revenir à mon espace
+            </a>
+        </section>
+    </main>
+{% endblock %}

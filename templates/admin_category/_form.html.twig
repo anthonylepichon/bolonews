@@ -1,0 +1,16 @@
+{{ form_start(form) }}
+
+    {{ form_errors(form) }}
+
+    {{ form_row(form.label, {
+        label: 'Libellé de la catégorie',
+        attr: {
+            placeholder: 'Exemple : Gastronomie'
+        }
+    }) }}
+
+    <button type="submit">
+        {{ button_label|default('Enregistrer') }}
+    </button>
+
+{{ form_end(form) }}

@@ -1,24 +1,165 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>
+            {% block title %}Bolonews{% endblock %}
+        </title>
+
         {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('styles/app.scss') }}">
         {% endblock %}
 
         {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
+            {% block importmap %}
+                {{ importmap('app') }}
+            {% endblock %}
         {% endblock %}
 
-        {% set frankenphp_hot_reload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
+        {% set frankenphp_hot_reload =
+            app.request.server.get('FRANKENPHP_HOT_RELOAD')
+        %}
+
         {% if frankenphp_hot_reload %}
-        <meta name="frankenphp-hot-reload:url" content="{{ frankenphp_hot_reload }}">
-        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
-        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
+            <meta
+                name="frankenphp-hot-reload:url"
+                content="{{ frankenphp_hot_reload }}"
+            >
+            <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
+            <script
+                src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm"
+                type="module"
+            ></script>
         {% endif %}
     </head>
+
     <body>
+        {% set currentRoute = app.request.attributes.get('_route') %}
+
+        <header>
+            <nav aria-label="Navigation principale">
+                <a href="{{ path('app_home') }}">
+                    Bolonews
+                </a>
+
+                <ul>
+                    <li>
+                        <a
+                            href="{{ path('app_home') }}"
+                            {% if currentRoute == 'app_home' %}
+                                aria-current="page"
+                            {% endif %}
+                        >
+                            Accueil
+                        </a>
+                    </li>
+
+                    <li>
+                        <a
+                            href="{{ path('app_article_index') }}"
+                            {% if currentRoute starts with 'app_article_' %}
+                                aria-current="page"
+                            {% endif %}
+                        >
+                            Articles
+                        </a>
+                    </li>
+
+                    <li>
+                        <a
+                            href="{{ path('app_contact') }}"
+                            {% if currentRoute == 'app_contact' %}
+                                aria-current="page"
+                            {% endif %}
+                        >
+                            Contact
+                        </a>
+                    </li>
+                </ul>
+
+                <ul>
+                    {% if app.user %}
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <li>
+                                <a
+                                    href="{{ path('app_admin') }}"
+                                    {% if currentRoute starts with 'app_admin' %}
+                                        aria-current="page"
+                                    {% endif %}
+                                >
+                                    Administration
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        <li>
+                            <a
+                                href="{{ path('app_profile_index') }}"
+                                {% if currentRoute starts with 'app_profile_' %}
+                                    aria-current="page"
+                                {% endif %}
+                            >
+                                Mon espace
+                            </a>
+                        </li>
+
+                        <li>
+                            {% if app.user.avatarFilename %}
+                                <img
+                                    src="{{ asset(
+                                        'images/avatars/'
+                                        ~ app.user.avatarFilename
+                                    ) }}"
+                                    alt="Avatar de {{ app.user.pseudo }}"
+                                >
+                            {% else %}
+                                <span aria-hidden="true">
+                                    {{ app.user.pseudo|slice(0, 2)|upper }}
+                                </span>
+                            {% endif %}
+                        </li>
+
+                        <li>
+                            <a href="{{ path('app_logout') }}">
+                                Me déconnecter
+                            </a>
+                        </li>
+                    {% else %}
+                        <li>
+                            <a
+                                href="{{ path('app_login') }}"
+                                {% if currentRoute == 'app_login' %}
+                                    aria-current="page"
+                                {% endif %}
+                            >
+                                Se connecter
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </header>
+
+                {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div
+                    role="{{ type == 'error' ? 'alert' : 'status' }}"
+                    data-flash-type="{{ type }}"
+                >
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
         {% block body %}{% endblock %}
+
+        <footer>
+            <p>
+                Projet Symfony créé par Anthony LE PICHON
+                dans le cadre d’une formation
+            </p>
+        </footer>
     </body>
 </html>

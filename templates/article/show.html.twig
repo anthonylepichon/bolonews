@@ -1,0 +1,169 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ article.title }} - Bolonews{% endblock %}
+
+{% block body %}
+    <main>
+        <article>
+            <p>{{ article.category.label }}</p>
+
+            <h1>{{ article.title }}</h1>
+            <p>{{ article.chapeau }}</p>
+
+            <img
+                src="{{ asset('images/articles/' ~ article.imageFilename) }}"
+                alt="Illustration de l’article {{ article.title }}"
+            >
+
+            <p>
+                Écrit par
+                {{ article.author
+                    ? article.author.pseudo
+                    : 'Auteur supprimé'
+                }}
+            </p>
+
+            <p>
+                Publié le {{ article.createdAt|date('d/m/Y à H:i') }}
+
+                {% if article.updatedAt %}
+                    - Mis à jour le
+                    {{ article.updatedAt|date('d/m/Y à H:i') }}
+                {% endif %}
+            </p>
+
+            <div>
+                {{ article.content|nl2br }}
+            </div>
+
+            <div>
+                <p>
+                    {{ article.comments|length }} commentaire(s)
+                </p>
+
+                {% if app.user %}
+                    <button
+                        type="button"
+                        data-like-button
+                        data-like-url="{{ path(
+                            'app_like_toggle',
+                            {id: article.id}
+                        ) }}"
+                        data-like-token="{{ csrf_token(
+                            'like-article' ~ article.id
+                        ) }}"
+                        aria-pressed="{{ hasLiked ? 'true' : 'false' }}"
+                    >
+                        <span
+                            data-like-icon
+                            aria-hidden="true"
+                        >
+                            {{ hasLiked ? '♥' : '♡' }}
+                        </span>
+
+                        <span data-like-label>
+                            {{ hasLiked ? 'Je n’aime plus' : 'J’aime' }}
+                        </span>
+
+                        <span data-like-count>
+                            {{ article.likes|length }}
+                        </span>
+                    </button>
+                {% else %}
+                    <p>
+                        <span aria-hidden="true">♡</span>
+                        {{ article.likes|length }} J’aime
+                    </p>
+
+                     <p
+                        data-like-error
+                        role="alert"
+                        hidden
+                    ></p>
+
+                    <a href="{{ path('app_login') }}">
+                        Se connecter pour aimer cet article
+                    </a>
+                {% endif %}
+            </div>
+        </article>
+
+        <section aria-labelledby="comments-title">
+            <h2 id="comments-title">Commentaires</h2>
+            {% if app.user and commentForm %}
+                <div>
+                    <h3>Ajouter un commentaire</h3>
+
+                    {{ form_start(commentForm) }}
+
+                        {{ form_errors(commentForm) }}
+
+                        {{ form_row(commentForm.content, {
+                            label: 'Votre commentaire',
+                            attr: {
+                                placeholder: 'Écrivez votre commentaire…'
+                            }
+                        }) }}
+
+                        <button type="submit">
+                            Publier le commentaire
+                        </button>
+
+                    {{ form_end(commentForm) }}
+                </div>
+            {% else %}
+                <div>
+                    <p>
+                        Vous devez être connecté pour publier
+                        un commentaire.
+                    </p>
+
+                    <a href="{{ path('app_login') }}">
+                        Se connecter
+                    </a>
+                </div>
+            {% endif %}
+
+            {% for comment in article.comments %}
+                <article>
+                    {% if comment.author and comment.author.avatarFilename %}
+                        <img
+                            src="{{ asset(
+                                'images/avatars/' ~ comment.author.avatarFilename
+                            ) }}"
+                            alt="Avatar de {{ comment.author.pseudo }}"
+                        >
+                    {% else %}
+                        <span aria-hidden="true">
+                            {{ comment.author
+                                ? comment.author.pseudo|slice(0, 2)|upper
+                                : '?'
+                            }}
+                        </span>
+                    {% endif %}
+
+                    <p>
+                        {{ comment.author
+                            ? comment.author.pseudo
+                            : 'Utilisateur supprimé'
+                        }}
+                    </p>
+
+                    <p>{{ comment.content }}</p>
+
+                    <p>
+                        Publié le {{ comment.createdAt|date('d/m/Y à H:i') }}
+                    </p>
+                </article>
+            {% else %}
+                <p>Aucun commentaire pour le moment.</p>
+            {% endfor %}
+        </section>
+
+        <p>
+            <a href="{{ path('app_article_index') }}">
+                Retour aux articles
+            </a>
+        </p>
+    </main>
+{% endblock %}

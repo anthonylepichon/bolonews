@@ -1,0 +1,6 @@
+// Les variables Bootstrap pourront être surchargées ici avant son import.
+
+// Bootstrap 5 utilise encore @import pour permettre la personnalisation de ses variables.
+@import '../../vendor/twbs/bootstrap/scss/bootstrap';
+
+// Les styles propres à Bolonews seront ajoutés sous cet import.

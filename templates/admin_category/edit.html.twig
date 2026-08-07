@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier une catégorie - Bolonews{% endblock %}
+
+{% block body %}
+    <main>
+        <header>
+            <h1>Modifier une catégorie</h1>
+            <p>
+                Renommez la catégorie « {{ category.label }} ».
+            </p>
+        </header>
+
+        <section aria-labelledby="category-edit-title">
+            <h2 id="category-edit-title">
+                Nouveau libellé
+            </h2>
+
+            {{ include(
+                'admin_category/_form.html.twig',
+                {
+                    button_label: 'Enregistrer les modifications'
+                }
+            ) }}
+
+            <a href="{{ path('app_admin_category_index') }}">
+                Annuler et revenir aux catégories
+            </a>
+        </section>
+    </main>
+{% endblock %}

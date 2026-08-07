@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des catégories - Bolonews{% endblock %}
+
+{% block body %}
+    <main>
+        <header>
+            <h1>Gestion des catégories</h1>
+            <p>
+                Ajoutez, renommez ou supprimez les catégories
+                utilisées par les articles.
+            </p>
+        </header>
+
+        <section aria-labelledby="categories-title">
+            <h2 id="categories-title">Catégories existantes</h2>
+
+            <a href="{{ path('app_admin_category_new') }}">
+                Ajouter une catégorie
+            </a>
+
+            <table>
+                <caption>
+                    Liste des catégories de Bolonews
+                </caption>
+
+                <thead>
+                    <tr>
+                        <th scope="col">Libellé</th>
+                        <th scope="col">Nombre d’articles</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for category in categories %}
+                        <tr>
+                            <td>{{ category.label }}</td>
+
+                            <td>
+                                {{ category.articles|length }}
+                            </td>
+
+                            <td>
+                                <a href="{{ path(
+                                    'app_admin_category_edit',
+                                    {id: category.id}
+                                ) }}">
+                                    Renommer
+                                </a>
+
+                                {{ include(
+                                    'admin_category/_delete_form.html.twig',
+                                    {
+                                        category: category
+                                    }
+                                ) }}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3">
+                                Aucune catégorie enregistrée.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+{% endblock %}

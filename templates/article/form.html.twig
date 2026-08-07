@@ -1,0 +1,136 @@
+{% extends 'base.html.twig' %}
+
+{% set isEditing = article.id is not null %}
+
+{% block title %}
+    {{ isEditing ? 'Modifier l’article' : 'Créer un article' }}
+    - Bolonews
+{% endblock %}
+
+{% block body %}
+    <main>
+        <header>
+            <h1>
+                {{ isEditing
+                    ? 'Modifier l’article'
+                    : 'Créer un article'
+                }}
+            </h1>
+
+            <p>
+                {{ isEditing
+                    ? 'Modifiez le contenu ou l’état de votre publication.'
+                    : 'Rédigez une nouvelle publication pour Bolonews.'
+                }}
+            </p>
+        </header>
+
+        <section aria-labelledby="article-form-title">
+            <h2 id="article-form-title">
+                Informations de l’article
+            </h2>
+
+            {{ form_start(articleForm) }}
+
+                {{ form_errors(articleForm) }}
+
+                {{ form_row(articleForm.title, {
+                    label: 'Titre'
+                }) }}
+
+                {{ form_row(articleForm.category, {
+                    label: 'Catégorie'
+                }) }}
+
+                {{ form_row(articleForm.chapeau, {
+                    label: 'Chapeau',
+                    help: 'Court texte présentant le contenu de l’article.'
+                }) }}
+
+                {{ form_row(articleForm.content, {
+                    label: 'Contenu'
+                }) }}
+
+                {% if isEditing and article.imageFilename %}
+                    <div>
+                        <p>Image actuelle</p>
+
+                        <img
+                            src="{{ asset(
+                                'images/articles/'
+                                ~ article.imageFilename
+                            ) }}"
+                            alt="Image actuelle de {{ article.title }}"
+                        >
+                    </div>
+                {% endif %}
+
+                {{ form_row(articleForm.image, {
+                    label: isEditing
+                        ? 'Choisir une nouvelle image'
+                        : 'Image de l’article',
+                    help: isEditing
+                        ? 'Laissez vide pour conserver l’image actuelle.'
+                        : 'Image JPG, PNG ou WebP, 5 Mo maximum.'
+                }) }}
+
+                <div>
+                    {% if not isEditing %}
+                        <button
+                            type="submit"
+                            name="publication_action"
+                            value="draft"
+                        >
+                            Enregistrer le brouillon
+                        </button>
+
+                        <button
+                            type="submit"
+                            name="publication_action"
+                            value="publish"
+                        >
+                            Publier l’article
+                        </button>
+                    {% elseif article.isPublished %}
+                        <button
+                            type="submit"
+                            name="publication_action"
+                            value="save"
+                        >
+                            Enregistrer les modifications
+                        </button>
+
+                        <button
+                            type="submit"
+                            name="publication_action"
+                            value="unpublish"
+                        >
+                            Dépublier l’article
+                        </button>
+                    {% else %}
+                        <button
+                            type="submit"
+                            name="publication_action"
+                            value="save"
+                        >
+                            Enregistrer les modifications
+                        </button>
+
+                        <button
+                            type="submit"
+                            name="publication_action"
+                            value="publish"
+                        >
+                            Publier l’article
+                        </button>
+                    {% endif %}
+                </div>
+
+            {{ form_end(articleForm) }}
+
+            <a href="{{ path('app_profile_index') }}">
+                Annuler et revenir à mon espace
+            </a>
+        </section>
+    </main>
+{% endblock %}

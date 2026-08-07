@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon espace - Bolonews{% endblock %}
+
+{% block body %}
+    <main>
+        <header>
+            <h1>Mon espace</h1>
+            <p>Gérez votre profil et vos publications.</p>
+        </header>
+
+        <section aria-labelledby="profile-title">
+            <h2 id="profile-title">Mon profil</h2>
+            <a href="{{ path('app_article_new') }}">
+                Ajouter un article
+            </a>
+
+            {% if user.avatarFilename %}
+                <img
+                    src="{{ asset(
+                        'images/avatars/' ~ user.avatarFilename
+                    ) }}"
+                    alt="Avatar de {{ user.pseudo }}"
+                >
+            {% else %}
+                <span aria-hidden="true">
+                    {{ user.pseudo|slice(0, 2)|upper }}
+                </span>
+            {% endif %}
+
+            <p>{{ user.pseudo }}</p>
+            <p>{{ user.email }}</p>
+            <a href="{{ path('app_profile_edit') }}">
+                Modifier mon profil
+            </a>
+        </section>
+
+        <section aria-labelledby="articles-title">
+            <h2 id="articles-title">Mes articles</h2>
+
+            {% for article in articles %}
+                <article>
+                    <img
+                        src="{{ asset(
+                            'images/articles/' ~ article.imageFilename
+                        ) }}"
+                        alt="Illustration de l’article {{ article.title }}"
+                    >
+
+                    <p>{{ article.category.label }}</p>
+
+                    <p>
+                        {% if article.isPublished %}
+                            Publié
+                        {% else %}
+                            Brouillon
+                        {% endif %}
+                    </p>
+
+                    <h3>{{ article.title }}</h3>
+                    <p>{{ article.chapeau }}</p>
+
+                    <p>
+                        Créé le
+                        {{ article.createdAt|date('d/m/Y à H:i') }}
+
+                        {% if article.updatedAt %}
+                            - Mis à jour le
+                            {{ article.updatedAt|date('d/m/Y à H:i') }}
+                        {% endif %}
+                    </p>
+
+                    <p>
+                        {{ article.comments|length }} commentaire(s) -
+                        {{ article.likes|length }} J’aime
+                    </p>
+
+                    {% if article.isPublished %}
+                        <a href="{{ path(
+                            'app_article_show',
+                            {id: article.id}
+                        ) }}">
+                            Voir l’article
+                        </a>
+                    {% endif %}
+
+                    <a href="{{ path(
+                        'app_article_edit',
+                        {id: article.id}
+                    ) }}">
+                        Éditer
+                    </a>
+                </article>
+            {% else %}
+                <p>Vous n’avez encore créé aucun article.</p>
+            {% endfor %}
+        </section>
+    </main>
+{% endblock %}

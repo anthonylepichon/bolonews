@@ -40,4 +40,49 @@ class ArticleRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    /**
+     * Recherche les articles publiés avec un filtre facultatif.
+     *
+     * @return Article[]
+     */
+    public function findPublishedByFilters(
+        ?string $search,
+        ?int $categoryId
+    ): array {
+        $queryBuilder = $this->createQueryBuilder('article')
+            ->andWhere('article.isPublished = :published')
+            ->setParameter('published', true)
+            ->orderBy('article.createdAt', 'DESC');
+
+        $search = trim((string) $search);
+
+        if ($search !== '') {
+            $queryBuilder
+                ->andWhere(
+                    'LOWER(article.title) LIKE LOWER(:search)
+                    OR LOWER(article.chapeau) LIKE LOWER(:search)
+                    OR LOWER(article.content) LIKE LOWER(:search)'
+                )
+                ->setParameter(
+                    'search',
+                    '%'.$search.'%'
+                );
+        }
+
+        if ($categoryId !== null) {
+            $queryBuilder
+                ->andWhere(
+                    'IDENTITY(article.category) = :categoryId'
+                )
+                ->setParameter(
+                    'categoryId',
+                    $categoryId
+                );
+        }
+
+        return $queryBuilder
+            ->getQuery()
+            ->getResult();
+    }
 }

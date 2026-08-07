@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter une catégorie - Bolonews{% endblock %}
+
+{% block body %}
+    <main>
+        <header>
+            <h1>Ajouter une catégorie</h1>
+            <p>
+                Créez une nouvelle catégorie pour classer les articles.
+            </p>
+        </header>
+
+        <section aria-labelledby="category-form-title">
+            <h2 id="category-form-title">
+                Nouvelle catégorie
+            </h2>
+
+            {{ include(
+                'admin_category/_form.html.twig',
+                {
+                    button_label: 'Ajouter la catégorie'
+                }
+            ) }}
+
+            <a href="{{ path('app_admin_category_index') }}">
+                Annuler et revenir aux catégories
+            </a>
+        </section>
+    </main>
+{% endblock %}

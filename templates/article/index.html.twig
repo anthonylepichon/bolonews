@@ -1,0 +1,178 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Articles - Bolonews{% endblock %}
+
+{% block body %}
+    <main>
+        <header>
+            <h1>Les articles</h1>
+
+            <p>
+                Découvrez les dernières publications de Bolonews.
+            </p>
+        </header>
+
+        <section aria-labelledby="article-search-title">
+            <h2 id="article-search-title">
+                Rechercher
+            </h2>
+
+            <form
+                action="{{ path('app_article_index') }}"
+                method="get"
+                role="search"
+                data-article-search-form
+            >
+                <label for="article-search">
+                    Rechercher un article
+                </label>
+
+                <div>
+                    <input
+                        type="search"
+                        id="article-search"
+                        name="recherche"
+                        value="{{ search }}"
+                        placeholder="Titre, chapeau ou contenu"
+                    >
+
+                    {% if selectedCategoryId %}
+                        <input
+                            type="hidden"
+                            name="categorie"
+                            value="{{ selectedCategoryId }}"
+                        >
+                    {% endif %}
+
+                    <button
+                        type="submit"
+                        aria-label="Lancer la recherche"
+                    >
+                        <span aria-hidden="true">🔍</span>
+                    </button>
+
+                    <a
+                        href="{{ path(
+                            'app_article_index',
+                            selectedCategoryId
+                                ? {
+                                    categorie: selectedCategoryId
+                                }
+                                : {}
+                        ) }}"
+                        data-search-reset
+                        aria-label="Effacer la recherche"
+                        {% if search is empty %}
+                            hidden
+                        {% endif %}
+                    >
+                        <span aria-hidden="true">×</span>
+                    </a>
+                </div>
+            </form>
+
+            <nav aria-label="Filtrer par catégorie">
+                <ul>
+                    <li>
+                        <a
+                            href="{{ path(
+                                'app_article_index',
+                                search is not empty
+                                    ? {
+                                        recherche: search
+                                    }
+                                    : {}
+                            ) }}"
+                            data-article-filter-link
+                            data-category-id=""
+                            data-category-label="Toutes"
+                            {% if selectedCategoryId is null %}
+                                aria-current="true"
+                            {% endif %}
+                        >
+                            Toutes
+                        </a>
+                    </li>
+
+                    {% for category in categories %}
+                        <li>
+                            <a
+                                href="{{ path(
+                                    'app_article_index',
+                                    search is not empty
+                                        ? {
+                                            recherche: search,
+                                            categorie: category.id
+                                        }
+                                        : {
+                                            categorie: category.id
+                                        }
+                                ) }}"
+                                data-article-filter-link
+                                data-category-id="{{ category.id }}"
+                                data-category-label="{{ category.label }}"
+                                {% if selectedCategoryId == category.id %}
+                                    aria-current="true"
+                                {% endif %}
+                            >
+                                {{ category.label }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+
+            <div
+                data-active-filters
+                {% if
+                    search is empty
+                    and selectedCategoryId is null
+                %}
+                    hidden
+                {% endif %}
+            >
+                <p>Filtres actifs :</p>
+
+                <ul data-active-filter-list>
+                    {% if search is not empty %}
+                        <li>
+                            Recherche : « {{ search }} »
+                        </li>
+                    {% endif %}
+
+                    {% if selectedCategoryId %}
+                        {% for category in categories %}
+                            {% if
+                                category.id
+                                == selectedCategoryId
+                            %}
+                                <li>
+                                    Catégorie :
+                                    {{ category.label }}
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            </div>
+        </section>
+
+        <section aria-labelledby="articles-title">
+            <h2 id="articles-title">
+                Toutes les publications
+            </h2>
+
+            <div
+                data-articles-results
+                aria-live="polite"
+            >
+                {{ include(
+                    'article/_list.html.twig',
+                    {
+                        articles: articles
+                    }
+                ) }}
+            </div>
+        </section>
+    </main>
+{% endblock %}

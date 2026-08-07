@@ -1,0 +1,51 @@
+{% for article in articles %}
+    <article>
+        <img
+            src="{{ asset(
+                'images/articles/' ~ article.imageFilename
+            ) }}"
+            alt="Illustration de l’article {{ article.title }}"
+        >
+
+        <p>{{ article.category.label }}</p>
+
+        <h3>
+            <a href="{{ path(
+                'app_article_show',
+                {id: article.id}
+            ) }}">
+                {{ article.title }}
+            </a>
+        </h3>
+
+        <p>{{ article.chapeau }}</p>
+
+        <p>
+            {{ article.author
+                ? article.author.pseudo
+                : 'Auteur supprimé'
+            }}
+        </p>
+
+        <p>
+            Publié le
+            {{ article.createdAt|date('d/m/Y à H:i') }}
+        </p>
+
+        <p>
+            {{ article.comments|length }} commentaire(s) -
+            {{ article.likes|length }} J’aime
+        </p>
+
+        <a href="{{ path(
+            'app_article_show',
+            {id: article.id}
+        ) }}">
+            Lire la suite
+        </a>
+    </article>
+{% else %}
+    <p>
+        Aucun article ne correspond aux critères sélectionnés.
+    </p>
+{% endfor %}

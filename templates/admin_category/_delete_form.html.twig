@@ -1,0 +1,38 @@
+<details>
+    <summary>Supprimer</summary>
+
+    {% if category.articles is empty %}
+        <p>
+            Supprimer définitivement la catégorie
+            « {{ category.label }} » ?
+        </p>
+
+        <p>Cette action est irréversible.</p>
+
+        <form
+            method="post"
+            action="{{ path(
+                'app_admin_category_delete',
+                {id: category.id}
+            ) }}"
+        >
+            <input
+                type="hidden"
+                name="_token"
+                value="{{ csrf_token(
+                    'delete' ~ category.id
+                ) }}"
+            >
+
+            <button type="submit">
+                Supprimer la catégorie
+            </button>
+        </form>
+    {% else %}
+        <p>
+            Cette catégorie ne peut pas être supprimée,
+            car elle est utilisée par
+            {{ category.articles|length }} article(s).
+        </p>
+    {% endif %}
+</details>
