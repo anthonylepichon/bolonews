@@ -69,17 +69,17 @@
                             {{ article.likes|length }}
                         </span>
                     </button>
+
+                    <p
+                        data-like-error
+                        role="alert"
+                        hidden
+                    ></p>
                 {% else %}
                     <p>
                         <span aria-hidden="true">♡</span>
                         {{ article.likes|length }} J’aime
                     </p>
-
-                     <p
-                        data-like-error
-                        role="alert"
-                        hidden
-                    ></p>
 
                     <a href="{{ path('app_login') }}">
                         Se connecter pour aimer cet article

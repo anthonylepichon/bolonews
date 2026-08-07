@@ -147,19 +147,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        resetLink.hidden = search === '';
+        resetLink.hidden =
+            search === '' && categoryId === '';
 
         const resetUrl = new URL(
             searchForm.action,
             window.location.origin
         );
-
-        if (categoryId !== '') {
-            resetUrl.searchParams.set(
-                'categorie',
-                categoryId
-            );
-        }
 
         resetLink.href = resetUrl.toString();
     };

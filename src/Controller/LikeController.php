@@ -56,34 +56,42 @@ final class LikeController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        $existingLike = $likeRepository->findOneBy([
-            'user' => $user,
-            'article' => $article,
-        ]);
+        try {
+            $existingLike = $likeRepository->findOneBy([
+                'user' => $user,
+                'article' => $article,
+            ]);
 
-        if ($existingLike === null) {
-            $like = new ArticleLike();
-            $like->setUser($user);
-            $like->setArticle($article);
+            if ($existingLike === null) {
+                $like = new ArticleLike();
+                $like->setUser($user);
+                $like->setArticle($article);
 
-            $entityManager->persist($like);
+                $entityManager->persist($like);
 
-            $liked = true;
-        } else {
-            $entityManager->remove($existingLike);
+                $liked = true;
+            } else {
+                $entityManager->remove($existingLike);
 
-            $liked = false;
+                $liked = false;
+            }
+
+            $entityManager->flush();
+
+            $likeCount = $likeRepository->count([
+                'article' => $article,
+            ]);
+        } catch (\Throwable) {
+            // Aucun détail technique n’est exposé dans la réponse JSON.
+            return $this->json(
+                ['error' => 'Une erreur est survenue.'],
+                JsonResponse::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
-
-        $entityManager->flush();
-
-        $likesCount = $likeRepository->count([
-            'article' => $article,
-        ]);
 
         return $this->json([
             'liked' => $liked,
-            'likesCount' => $likesCount,
+            'likeCount' => $likeCount,
         ]);
     }
 }

@@ -52,17 +52,13 @@
                     </button>
 
                     <a
-                        href="{{ path(
-                            'app_article_index',
-                            selectedCategoryId
-                                ? {
-                                    categorie: selectedCategoryId
-                                }
-                                : {}
-                        ) }}"
+                        href="{{ path('app_article_index') }}"
                         data-search-reset
-                        aria-label="Effacer la recherche"
-                        {% if search is empty %}
+                        aria-label="Réinitialiser la recherche"
+                        {% if
+                            search is empty
+                            and selectedCategoryId is null
+                        %}
                             hidden
                         {% endif %}
                     >

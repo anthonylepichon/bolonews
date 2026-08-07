@@ -24,6 +24,17 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
     likeButton.addEventListener('click', async () => {
+        // Ces valeurs permettent de restaurer fidèlement
+        // l'interface si la requête échoue.
+        const previousState = {
+            pressed: likeButton.getAttribute(
+                'aria-pressed'
+            ),
+            icon: likeIcon.textContent,
+            label: likeLabel.textContent,
+            count: likeCount.textContent,
+        };
+
         likeButton.disabled = true;
 
         if (errorMessage) {
@@ -31,9 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
             errorMessage.textContent = '';
         }
 
-        const requestBody = new URLSearchParams({
+        const requestBody = JSON.stringify({
             _token: likeButton.dataset.likeToken,
         });
+
+        let userMessage =
+            'Le J’aime n’a pas pu être enregistré.';
 
         try {
             const response = await fetch(
@@ -42,20 +56,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     headers: {
                         'Content-Type':
-                            'application/x-www-form-urlencoded',
+                            'application/json',
+                        Accept: 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
                     },
                     body: requestBody,
                 }
             );
 
-            if (!response.ok) {
-                throw new Error(
-                    'La requête J’aime a échoué.'
-                );
+            let data;
+
+            try {
+                data = await response.json();
+            } catch {
+                userMessage =
+                    'La réponse du serveur est invalide.';
+
+                throw new Error();
             }
 
-            const data = await response.json();
+            if (!response.ok) {
+                userMessage = data.error ?? userMessage;
+
+                throw new Error();
+            }
+
+            if (
+                typeof data.liked !== 'boolean'
+                || !Number.isInteger(data.likeCount)
+            ) {
+                userMessage =
+                    'La réponse du serveur est invalide.';
+
+                throw new Error();
+            }
 
             likeButton.setAttribute(
                 'aria-pressed',
@@ -70,13 +104,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? 'Je n’aime plus'
                 : 'J’aime';
 
-            likeCount.textContent = data.likesCount;
-        } catch (error) {
-            console.error(error);
+            likeCount.textContent = data.likeCount;
+        } catch {
+            likeButton.setAttribute(
+                'aria-pressed',
+                previousState.pressed
+            );
+
+            likeIcon.textContent = previousState.icon;
+            likeLabel.textContent = previousState.label;
+            likeCount.textContent = previousState.count;
 
             if (errorMessage) {
-                errorMessage.textContent =
-                    'Le J’aime n’a pas pu être enregistré.';
+                errorMessage.textContent = userMessage;
 
                 errorMessage.hidden = false;
             }
