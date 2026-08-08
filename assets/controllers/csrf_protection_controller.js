@@ -1,3 +1,5 @@
+// Présentation : contrôleur de protection CSRF fourni par Symfony UX.
+// Rôle : ajouter le jeton attendu aux formulaires concernés avant leur soumission.
 const nameCheck = /^[-_a-zA-Z0-9]{4,22}$/;
 const tokenCheck = /^[-_/+a-zA-Z0-9]{24,}$/;
 

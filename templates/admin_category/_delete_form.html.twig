@@ -1,3 +1,6 @@
+{# Présentation : fragment Twig de suppression d'une catégorie.
+   Rôle : proposer une confirmation sans JavaScript et expliquer un éventuel blocage métier. #}
+{# Zone : panneau de confirmation repliable. #}
 <details>
     <summary>Supprimer</summary>
 
@@ -9,6 +12,7 @@
 
         <p>Cette action est irréversible.</p>
 
+        {# Zone : requête POST de suppression protégée par un jeton CSRF. #}
         <form
             method="post"
             action="{{ path(
@@ -24,11 +28,12 @@
                 ) }}"
             >
 
-            <button type="submit">
+            <button class="btn btn-danger" type="submit">
                 Supprimer la catégorie
             </button>
         </form>
     {% else %}
+        {# Zone : explication du blocage lorsque des articles sont encore liés. #}
         <p>
             Cette catégorie ne peut pas être supprimée,
             car elle est utilisée par

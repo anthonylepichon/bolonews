@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : définition Symfony Form de la modification du profil.
+ * Rôle : gérer pseudo, e-mail, avatar et changement facultatif du mot de passe.
+ */
+
 namespace App\Form;
 
 use App\Entity\User;
@@ -18,6 +23,20 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ProfileFormType extends AbstractType
 {
+    // -----------------------
+    // ATTRIBUTS
+    // -----------------------
+    // Aucun attribut : la structure est construite à partir des arguments reçus.
+
+    // -----------------------
+    // METHODES
+    // -----------------------
+
+    /**
+     * Rôle : Déclare les champs, widgets et contraintes du formulaire Symfony.
+     * Paramètre : `$builder` (FormBuilderInterface) : le constructeur du formulaire Symfony ; `$options` (array) : les options disponibles pour configurer le formulaire.
+     * Retour : Aucun (`void`).
+     */
     public function buildForm(
         FormBuilderInterface $builder,
         array $options
@@ -40,6 +59,8 @@ class ProfileFormType extends AbstractType
                 ],
             ])
             ->add('avatar', FileType::class, [
+                // Le fichier est traité manuellement par ProfileController ;
+                // mapped=false évite de l'affecter à avatarFilename.
                 'mapped' => false,
                 'required' => false,
                 'attr' => [
@@ -70,6 +91,8 @@ class ProfileFormType extends AbstractType
                 ],
             ])
             ->add('newPassword', RepeatedType::class, [
+                // RepeatedType génère deux champs et vérifie leur égalité. Le
+                // champ non mappé ne remplace le mot de passe que s'il est rempli.
                 'mapped' => false,
                 'required' => false,
                 'type' => PasswordType::class,
@@ -96,6 +119,11 @@ class ProfileFormType extends AbstractType
             ]);
     }
 
+    /**
+     * Rôle : Définit la classe de données et les options acceptées par le formulaire.
+     * Paramètre : `$resolver` (OptionsResolver) : le résolveur chargé des options du formulaire.
+     * Retour : Aucun (`void`).
+     */
     public function configureOptions(
         OptionsResolver $resolver
     ): void {

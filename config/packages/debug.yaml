@@ -1,3 +1,5 @@
+# Présentation : configuration des outils de débogage en développement.
+# Rôle : enrichir les informations d'erreur sans les activer en production.
 when@dev:
     debug:
         # Forwards VarDumper Data clones to a centralized server allowing to inspect dumps on CLI or in your browser.

@@ -1,3 +1,5 @@
+# Présentation : configuration de l'authentification et des autorisations.
+# Rôle : relier User au firewall, au formulaire de connexion et au contrôle des comptes bannis.
 security:
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
@@ -19,8 +21,11 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+            # Contrôle métier ajouté : refuse l'accès aux comptes bannis.
             user_checker: App\Security\UserChecker
             form_login:
+                # Symfony intercepte le POST de cette route et vérifie lui-même
+                # les identifiants ainsi que le jeton CSRF du formulaire Twig.
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
@@ -29,6 +34,12 @@ security:
                 target: app_home
                 # where to redirect after logout
                 # target: app_any_route
+            remember_me:
+                # Le cookie reste facultatif : il n'est créé que si la case
+                # _remember_me du formulaire de connexion est cochée.
+                secret: '%kernel.secret%'
+                lifetime: 604800
+                path: /
 
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall

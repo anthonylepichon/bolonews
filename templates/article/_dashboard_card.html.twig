@@ -1,0 +1,57 @@
+{# Présentation : carte d'article commune aux tableaux de bord.
+   Rôle : adapter l'état ou l'auteur avec showAuthor sans dupliquer le HTML. #}
+<article class="latest-article dashboard-article-card">
+    {# Zone : illustration de la publication. #}
+    <img
+        class="latest-article__image"
+        src="{{ asset('images/articles/' ~ article.imageFilename) }}"
+        alt="Illustration de l’article {{ article.title }}"
+    >
+
+    {# Zone : informations éditoriales et actions de la carte. #}
+    <div class="latest-article__body dashboard-article-card__body">
+        <span class="article-category">{{ article.category.label }}</span>
+
+        <h3 class="latest-article__title">
+            <a href="{{ path('app_article_show', {id: article.id}) }}">
+                {{ article.title }}
+            </a>
+        </h3>
+
+        {# Zone : état ou auteur, puis date de dernière évolution. #}
+        <div class="latest-article__publication">
+            <span>
+                {% if showAuthor|default(false) %}
+                    {{ article.author ? article.author.pseudo : 'Auteur supprimé' }}
+                {% else %}
+                    {{ article.isPublished ? 'Publié' : 'Brouillon' }}
+                {% endif %}
+            </span>
+            <time datetime="{{ (article.updatedAt ?? article.createdAt)|date('c') }}">
+                {{ article.updatedAt ? 'Mis à jour' : 'Créé' }} le
+                {{ (article.updatedAt ?? article.createdAt)|date('d/m/Y') }}
+            </time>
+        </div>
+
+        <p class="latest-article__summary">{{ article.chapeau }}</p>
+
+        {# Zone : statistiques et bouton compact d'édition. #}
+        <div class="dashboard-article-card__footer">
+            <div class="article-stats latest-article__stats" aria-label="Statistiques de l’article">
+                <span>
+                    <img class="article-stat-icon" src="{{ asset('images/icons/message-circle.svg') }}" alt="">
+                    {{ article.comments|length }}
+                </span>
+                <span>
+                    <img class="article-stat-icon" src="{{ asset('images/icons/heart.svg') }}" alt="">
+                    {{ article.likes|length }}
+                </span>
+            </div>
+
+            {# btn-compact est l'exception SCSS à la hauteur standard de 44 px. #}
+            <a class="btn btn-outline-primary btn-compact" href="{{ path('app_article_edit', {id: article.id}) }}">
+                Éditer
+            </a>
+        </div>
+    </div>
+</article>

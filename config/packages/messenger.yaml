@@ -1,3 +1,5 @@
+# Présentation : configuration du composant Messenger.
+# Rôle : définir le transport utilisé lorsque Symfony doit distribuer un message applicatif.
 framework:
     messenger:
         transports:

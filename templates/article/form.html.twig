@@ -1,136 +1,174 @@
+{# Présentation : formulaire éditorial commun aux articles.
+   Rôle : gérer création, modification, brouillon, publication, image et suppression administrative. #}
 {% extends 'base.html.twig' %}
 
 {% set isEditing = article.id is not null %}
+{# Le même template et le même FormType servent à la création et à la modification. #}
+{% set cancelRoute = is_granted('ROLE_ADMIN') ? 'app_admin' : 'app_profile_index' %}
 
-{% block title %}
-    {{ isEditing ? 'Modifier l’article' : 'Créer un article' }}
-    - Bolonews
-{% endblock %}
+{% block title %}{{ isEditing ? 'Modifier l’article' : 'Créer un article' }} - Bolonews{% endblock %}
 
 {% block body %}
+    {# Zone : contenu principal de l'éditeur d'article. #}
     <main>
-        <header>
-            <h1>
+        {# Zone : en-tête dont le texte s'adapte à la création ou à la modification. #}
+        <header class="home-masthead">
+            <h1 class="home-masthead__title">Bolonews</h1>
+            <p class="home-masthead__subtitle">
                 {{ isEditing
-                    ? 'Modifier l’article'
-                    : 'Créer un article'
-                }}
-            </h1>
-
-            <p>
-                {{ isEditing
-                    ? 'Modifiez le contenu ou l’état de votre publication.'
-                    : 'Rédigez une nouvelle publication pour Bolonews.'
+                    ? 'Modifiez, prévisualisez et gérez la publication de votre article.'
+                    : 'Rédigez, prévisualisez et publiez votre article.'
                 }}
             </p>
         </header>
 
-        <section aria-labelledby="article-form-title">
-            <h2 id="article-form-title">
-                Informations de l’article
-            </h2>
+        {# Zone : carte principale du formulaire éditorial. #}
+        <div class="container article-form-content">
+            <section class="form-card form-card--article" aria-labelledby="article-form-title">
+                <h2 id="article-form-title">
+                    {{ isEditing ? 'Modifier l’article' : 'Créer un article' }}
+                </h2>
 
-            {{ form_start(articleForm) }}
-
-                {{ form_errors(articleForm) }}
-
-                {{ form_row(articleForm.title, {
-                    label: 'Titre'
+                {# Zone : formulaire Symfony de l'article.
+                   data-image-preview-form est le point d'accroche du module JS. #}
+                {{ form_start(articleForm, {
+                    attr: {
+                        class: 'app-form article-editor',
+                        'data-image-preview-form': ''
+                    }
                 }) }}
+                    {{ form_errors(articleForm) }}
 
-                {{ form_row(articleForm.category, {
-                    label: 'Catégorie'
-                }) }}
+                    {# Zone : informations courtes — titre, catégorie et chapeau. #}
+                    <div class="article-editor__intro-grid">
+                        <div>
+                            {{ form_row(articleForm.title, {
+                                label: 'Titre',
+                                attr: {placeholder: 'Titre de l’article'}
+                            }) }}
+                            {{ form_row(articleForm.category, {label: 'Catégorie'}) }}
+                        </div>
 
-                {{ form_row(articleForm.chapeau, {
-                    label: 'Chapeau',
-                    help: 'Court texte présentant le contenu de l’article.'
-                }) }}
-
-                {{ form_row(articleForm.content, {
-                    label: 'Contenu'
-                }) }}
-
-                {% if isEditing and article.imageFilename %}
-                    <div>
-                        <p>Image actuelle</p>
-
-                        <img
-                            src="{{ asset(
-                                'images/articles/'
-                                ~ article.imageFilename
-                            ) }}"
-                            alt="Image actuelle de {{ article.title }}"
-                        >
+                        <div>
+                            {{ form_row(articleForm.chapeau, {
+                                label: 'Chapeau',
+                                help: 'Présentez l’essentiel de l’article en 500 caractères maximum.',
+                                attr: {placeholder: 'Court texte de présentation'}
+                            }) }}
+                        </div>
                     </div>
-                {% endif %}
 
-                {{ form_row(articleForm.image, {
-                    label: isEditing
-                        ? 'Choisir une nouvelle image'
-                        : 'Image de l’article',
-                    help: isEditing
-                        ? 'Laissez vide pour conserver l’image actuelle.'
-                        : 'Image JPG, PNG ou WebP, 5 Mo maximum.'
-                }) }}
+                    {# Zone : contenu rédactionnel long de l'article. #}
+                    {{ form_row(articleForm.content, {
+                        label: 'Contenu',
+                        attr: {
+                            placeholder: 'Rédigez le contenu de votre article…',
+                            rows: 12
+                        }
+                    }) }}
 
-                <div>
-                    {% if not isEditing %}
-                        <button
-                            type="submit"
-                            name="publication_action"
-                            value="draft"
-                        >
-                            Enregistrer le brouillon
-                        </button>
+                    {# Zone : sélection et aperçu de l'image principale. #}
+                    <div class="article-image-editor">
+                        {{ form_label(articleForm.image, isEditing ? 'Remplacer l’image principale' : 'Image principale') }}
+                        {# form-control vient de Bootstrap ; les data-* sont ajoutés
+                           manuellement pour image-preview.js. #}
+                        {{ form_widget(articleForm.image, {
+                            attr: {
+                                class: 'form-control',
+                                'data-image-input': '',
+                                'data-preview-shape': 'article'
+                            }
+                        }) }}
+                        {{ form_errors(articleForm.image) }}
+                        <div class="form-text">
+                            JPG, PNG ou WebP · 5 Mo maximum{% if isEditing %} · Laissez vide pour conserver l’image actuelle{% endif %}
+                        </div>
 
-                        <button
-                            type="submit"
-                            name="publication_action"
-                            value="publish"
-                        >
-                            Publier l’article
-                        </button>
-                    {% elseif article.isPublished %}
-                        <button
-                            type="submit"
-                            name="publication_action"
-                            value="save"
-                        >
-                            Enregistrer les modifications
-                        </button>
+                        <div class="article-image-preview" data-image-preview-wrapper>
+                            {% if isEditing and article.imageFilename %}
+                                <img
+                                    data-image-preview
+                                    src="{{ asset('images/articles/' ~ article.imageFilename) }}"
+                                    alt="Aperçu de l’image de {{ article.title }}"
+                                >
+                            {% else %}
+                                <div class="article-image-preview__placeholder" data-image-preview>
+                                    <img src="{{ asset('images/icons/upload.svg') }}" alt="">
+                                    <span>L’aperçu de l’image apparaîtra ici</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
 
-                        <button
-                            type="submit"
-                            name="publication_action"
-                            value="unpublish"
-                        >
-                            Dépublier l’article
-                        </button>
-                    {% else %}
-                        <button
-                            type="submit"
-                            name="publication_action"
-                            value="save"
-                        >
-                            Enregistrer les modifications
-                        </button>
+                    {# Zone : actions de sauvegarde et de publication selon l'état. #}
+                    <div class="article-form-actions">
+                        {# Les boutons partagent le formulaire. Leur nom identique et
+                           leur valeur différente indiquent l'action au contrôleur. #}
+                        {% if not isEditing %}
+                            <button class="btn btn-outline-primary" type="submit" name="publication_action" value="draft">
+                                Enregistrer le brouillon
+                            </button>
+                            <button class="btn btn-primary" type="submit" name="publication_action" value="publish">
+                                Publier l’article
+                            </button>
+                        {% elseif article.isPublished %}
+                            <button class="btn btn-outline-primary" type="submit" name="publication_action" value="save">
+                                Enregistrer les modifications
+                            </button>
+                            <button class="btn btn-primary" type="submit" name="publication_action" value="unpublish">
+                                Dépublier l’article
+                            </button>
+                        {% else %}
+                            <button class="btn btn-outline-primary" type="submit" name="publication_action" value="save">
+                                Enregistrer les modifications
+                            </button>
+                            <button class="btn btn-primary" type="submit" name="publication_action" value="publish">
+                                Publier l’article
+                            </button>
+                        {% endif %}
+                    </div>
+                {{ form_end(articleForm) }}
 
-                        <button
-                            type="submit"
-                            name="publication_action"
-                            value="publish"
-                        >
-                            Publier l’article
+                {# Zone : annulation et suppression administrative. #}
+                <div class="article-form-secondary-actions">
+                    <a class="btn btn-outline-primary" href="{{ path(cancelRoute) }}">Annuler</a>
+
+                    {% if isEditing and is_granted('ROLE_ADMIN') %}
+                        {# data-bs-toggle/target ouvrent la modale Bootstrap située
+                           plus bas, sans gestion JavaScript personnalisée. #}
+                        <button class="btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#delete-article-modal">
+                            Supprimer l’article
                         </button>
                     {% endif %}
                 </div>
-
-            {{ form_end(articleForm) }}
-
-            <a href="{{ path('app_profile_index') }}">
-                Annuler et revenir à mon espace
-            </a>
-        </section>
+            </section>
+        </div>
     </main>
+
+    {% if isEditing and is_granted('ROLE_ADMIN') %}
+        {# Zone : fenêtre de confirmation de suppression définitive.
+           Structure imposée par le composant Modal Bootstrap. La suppression
+           définitive ne part qu'après validation du formulaire POST avec CSRF. #}
+        <div class="modal fade" id="delete-article-modal" tabindex="-1" aria-labelledby="delete-article-title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="delete-article-title">Supprimer définitivement cet article ?</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>« {{ article.title }} » sera définitivement supprimé.</p>
+                        <p class="mb-0"><strong>Cette action est irréversible.</strong></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Annuler</button>
+                        <form method="post" action="{{ path('app_article_delete', {id: article.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete-article' ~ article.id) }}">
+                            <button class="btn btn-danger" type="submit">Supprimer l’article</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}

@@ -1,3 +1,5 @@
+# Présentation : configuration de la traduction Symfony.
+# Rôle : fixer la langue par défaut et les chemins des éventuels messages traduits.
 framework:
     default_locale: en
     translator:

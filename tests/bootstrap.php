@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : amorçage de l'environnement de tests.
+ * Rôle : charger les dépendances et les variables d'environnement avant PHPUnit.
+ */
+
 use Symfony\Component\Dotenv\Dotenv;
 
 require dirname(__DIR__).'/vendor/autoload.php';

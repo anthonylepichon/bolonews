@@ -1,71 +1,107 @@
+{# Présentation : interface d'administration des catégories.
+   Rôle : ajouter, modifier en ligne et supprimer une catégorie selon ses relations. #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Gestion des catégories - Bolonews{% endblock %}
 
 {% block body %}
+    {# Zone : contenu principal de la gestion des catégories. #}
     <main>
-        <header>
-            <h1>Gestion des catégories</h1>
-            <p>
-                Ajoutez, renommez ou supprimez les catégories
-                utilisées par les articles.
-            </p>
+        {# Zone : en-tête présentant le classement éditorial. #}
+        <header class="home-masthead">
+            <h1 class="home-masthead__title">Bolonews</h1>
+            <p class="home-masthead__subtitle">Gérez le classement des publications de Bolonews.</p>
         </header>
 
-        <section aria-labelledby="categories-title">
-            <h2 id="categories-title">Catégories existantes</h2>
+        {# Zone : carte de création et liste des catégories. #}
+        <div class="container management-page-content management-page-content--categories">
+            <section class="management-card" aria-labelledby="categories-title">
+                <h2 id="categories-title">Gestion des catégories</h2>
+                <p>Créez, renommez ou supprimez les catégories des articles.</p>
 
-            <a href="{{ path('app_admin_category_new') }}">
-                Ajouter une catégorie
-            </a>
+                {# Zone : ajout rapide d'une nouvelle catégorie.
+                   form-control et btn viennent de Bootstrap ; category-create-form
+                   organise manuellement le champ et le bouton sur une ligne. #}
+                {{ form_start(newCategoryForm, {attr: {class: 'category-create-form'}}) }}
+                    <div class="category-create-form__field">
+                        {{ form_widget(newCategoryForm.label, {attr: {class: 'form-control', placeholder: 'Nom de la catégorie'}}) }}
+                        {{ form_errors(newCategoryForm.label) }}
+                    </div>
+                    {{ form_rest(newCategoryForm) }}
+                    <button class="btn btn-primary" type="submit">Ajouter</button>
+                {{ form_end(newCategoryForm, {render_rest: false}) }}
 
-            <table>
-                <caption>
-                    Liste des catégories de Bolonews
-                </caption>
+                {# Zone : tableau de consultation et modification en ligne. #}
+                <div class="category-table" role="table" aria-label="Liste des catégories de Bolonews">
+                    <div class="category-table__header" role="row">
+                        <span role="columnheader">Catégorie</span>
+                        <span role="columnheader">Articles</span>
+                        <span role="columnheader">Actions</span>
+                    </div>
 
-                <thead>
-                    <tr>
-                        <th scope="col">Libellé</th>
-                        <th scope="col">Nombre d’articles</th>
-                        <th scope="col">Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
                     {% for category in categories %}
-                        <tr>
-                            <td>{{ category.label }}</td>
+                        {# Les data-category-* relient la ligne à category-management.js,
+                           qui alterne localement l'affichage et le formulaire. #}
+                        <div class="category-row" role="row" data-category-row>
+                            <div class="category-row__display" data-category-display>
+                                <span role="cell">{{ category.label }}</span>
+                                <span role="cell">{{ category.articles|length }} article(s)</span>
+                                <span class="management-actions" role="cell">
+                                    <button class="btn btn-outline-primary" type="button" data-category-edit-button>Modifier</button>
+                                    {# La suppression utilise une modale Bootstrap ;
+                                       la modification en ligne utilise notre JS. #}
+                                    <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#delete-category-{{ category.id }}">Supprimer</button>
+                                </span>
+                            </div>
 
-                            <td>
-                                {{ category.articles|length }}
-                            </td>
-
-                            <td>
-                                <a href="{{ path(
-                                    'app_admin_category_edit',
-                                    {id: category.id}
-                                ) }}">
-                                    Renommer
-                                </a>
-
-                                {{ include(
-                                    'admin_category/_delete_form.html.twig',
-                                    {
-                                        category: category
-                                    }
-                                ) }}
-                            </td>
-                        </tr>
+                            <div class="category-row__edit" data-category-edit hidden>
+                                {# Zone : formulaire masqué jusqu'au clic sur « Modifier ». #}
+                                {{ form_start(editForms[category.id], {attr: {class: 'category-inline-form'}}) }}
+                                    {{ form_widget(editForms[category.id].label, {attr: {class: 'form-control'}}) }}
+                                    {{ form_rest(editForms[category.id]) }}
+                                    <button class="btn btn-primary" type="submit">Enregistrer</button>
+                                    <button class="btn btn-outline-primary" type="button" data-category-cancel-button>Annuler</button>
+                                {{ form_end(editForms[category.id], {render_rest: false}) }}
+                            </div>
+                        </div>
                     {% else %}
-                        <tr>
-                            <td colspan="3">
-                                Aucune catégorie enregistrée.
-                            </td>
-                        </tr>
+                        <p class="empty-state">Aucune catégorie enregistrée.</p>
                     {% endfor %}
-                </tbody>
-            </table>
-        </section>
+                </div>
+            </section>
+
+            {# Zone : retour vers le tableau de bord général. #}
+            <a class="btn btn-outline-primary management-back" href="{{ path('app_admin') }}">Retour à l’espace administrateur</a>
+        </div>
     </main>
+
+    {% for category in categories %}
+        {# Zone : confirmation de suppression propre à chaque catégorie.
+           La modale explique aussi pourquoi une catégorie liée à des articles
+           ne peut pas être supprimée ; le contrôleur revérifie cette règle. #}
+        <div class="modal fade" id="delete-category-{{ category.id }}" tabindex="-1" aria-labelledby="delete-category-title-{{ category.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="delete-category-title-{{ category.id }}">Supprimer la catégorie « {{ category.label }} » ?</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    {% if category.articles is empty %}
+                        <p class="mb-0"><strong>Cette action est irréversible.</strong></p>
+                    {% else %}
+                        <p class="mb-0">Cette catégorie est utilisée par {{ category.articles|length }} article(s) et ne peut pas être supprimée.</p>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Annuler</button>
+                    {% if category.articles is empty %}
+                        <form method="post" action="{{ path('app_admin_category_delete', {id: category.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ category.id) }}">
+                            <button class="btn btn-danger" type="submit">Supprimer la catégorie</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div></div>
+        </div>
+    {% endfor %}
 {% endblock %}

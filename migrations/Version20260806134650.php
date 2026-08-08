@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : migration Doctrine décrivant la création du schéma Bolonews.
+ * Rôle : reproduire les tables, colonnes, index et relations de la base de données.
+ */
+
 declare(strict_types=1);
 
 namespace DoctrineMigrations;
@@ -12,11 +17,30 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20260806134650 extends AbstractMigration
 {
+    // -----------------------
+    // ATTRIBUTS
+    // -----------------------
+    // Aucun attribut : les opérations SQL sont définies dans les méthodes.
+
+    // -----------------------
+    // METHODES
+    // -----------------------
+
+    /**
+     * Rôle : Fournit une description lisible de la migration.
+     * Paramètre : Aucun.
+     * Retour : Une chaîne de caractères.
+     */
     public function getDescription(): string
     {
         return 'Création du schéma initial de Bolonews';
     }
 
+    /**
+     * Rôle : Applique la création du schéma de base de données Bolonews.
+     * Paramètre : `$schema` (Schema) : la représentation Doctrine du schéma SQL.
+     * Retour : Aucun (`void`).
+     */
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
@@ -33,6 +57,11 @@ final class Version20260806134650 extends AbstractMigration
         $this->addSql('ALTER TABLE comment ADD CONSTRAINT FK_9474526CF675F31B FOREIGN KEY (author_id) REFERENCES user (id) ON DELETE SET NULL');
     }
 
+    /**
+     * Rôle : Annule la migration en supprimant le schéma créé.
+     * Paramètre : `$schema` (Schema) : la représentation Doctrine du schéma SQL.
+     * Retour : Aucun (`void`).
+     */
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs

@@ -1,3 +1,5 @@
+// Présentation : contrôleur Stimulus d'exemple généré lors de l'installation.
+// Rôle : montrer comment relier un data-controller HTML à une classe JavaScript.
 import { Controller } from '@hotwired/stimulus';
 
 /*
@@ -10,6 +12,15 @@ import { Controller } from '@hotwired/stimulus';
  * Delete this file or adapt it for your use!
  */
 export default class extends Controller {
+    // -----------------------
+    // ATTRIBUTS
+    // -----------------------
+    // Aucun attribut propre : this.element est fourni par Stimulus.
+
+    // -----------------------
+    // METHODES
+    // -----------------------
+
     connect() {
         this.element.textContent = 'Hello Stimulus! Edit me in assets/controllers/hello_controller.js';
     }

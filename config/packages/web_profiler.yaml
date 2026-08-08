@@ -1,3 +1,5 @@
+# Présentation : configuration de la barre et du profiler en développement.
+# Rôle : fournir des informations sur les requêtes sans exposer ces outils en production.
 when@dev:
     web_profiler:
         toolbar: true

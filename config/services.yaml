@@ -1,3 +1,5 @@
+# Présentation : configuration du conteneur de services de l'application.
+# Rôle : activer l'injection automatique et déclarer les dossiers de téléversement Bolonews.
 # yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
 
 # This file is the entry point to configure your own services.
@@ -7,6 +9,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    # Paramètres ajoutés au projet : les contrôleurs les utilisent comme dossiers
+    # de destination tout en conservant des chemins indépendants de la machine.
     avatars_directory: '%kernel.project_dir%/public/images/avatars'
     articles_directory: '%kernel.project_dir%/public/images/articles'
 

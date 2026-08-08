@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : carte des modules JavaScript gérée par AssetMapper.
+ * Rôle : associer les imports de app.js à leurs fichiers ou paquets sans utiliser npm.
+ */
+
 /**
  * Returns the importmap for this application.
  *

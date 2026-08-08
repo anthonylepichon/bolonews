@@ -1,3 +1,6 @@
+// Présentation : module de recherche et de filtrage des articles.
+// Rôle : demander la liste à Symfony par AJAX, synchroniser l'interface et conserver
+// le formulaire GET comme solution de secours lorsque JavaScript est indisponible.
 document.addEventListener('DOMContentLoaded', () => {
     const searchForm = document.querySelector(
         '[data-article-search-form]'
@@ -8,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
     if (!searchForm || !resultsContainer) {
+        // Sortie immédiate sur les pages qui ne possèdent pas cette interface.
         return;
     }
 
@@ -33,7 +37,13 @@ document.addEventListener('DOMContentLoaded', () => {
         '[data-active-filter-list]'
     );
 
+    const resultsTitle = document.querySelector(
+        '[data-articles-title]'
+    );
+
     const updateCategoryInput = (categoryId) => {
+        // Le filtre catégorie est conservé dans un champ caché afin qu'une
+        // recherche textuelle ultérieure envoie les deux critères ensemble.
         let categoryInput = searchForm.querySelector(
             'input[name="categorie"]'
         );
@@ -59,6 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
         search,
         selectedCategoryId
     ) => {
+        // Les href restent toujours valides pour une ouverture dans un nouvel
+        // onglet ou un usage sans JavaScript ; aria-current indique le filtre actif.
         filterLinks.forEach((link) => {
             const categoryId = link.dataset.categoryId;
             const linkUrl = new URL(
@@ -97,6 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
         search,
         categoryId
     ) => {
+        // Le résumé visible est reconstruit avec textContent : le texte saisi
+        // n'est jamais interprété comme du HTML.
         if (!activeFilters || !activeFilterList) {
             return;
         }
@@ -183,12 +197,21 @@ document.addEventListener('DOMContentLoaded', () => {
             search,
             categoryId
         );
+
+        if (resultsTitle) {
+            resultsTitle.textContent =
+                search !== '' || categoryId !== ''
+                    ? 'Résultats de recherche'
+                    : 'Tous les articles';
+        }
     };
 
     const loadResults = async (
         url,
         updateHistory = true
     ) => {
+        // aria-busy informe les technologies d'assistance qu'un résultat est
+        // momentanément en cours de chargement.
         resultsContainer.setAttribute(
             'aria-busy',
             'true'
@@ -199,6 +222,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 url.toString(),
                 {
                     headers: {
+                        // Le contrôleur reconnaît cet en-tête et renvoie seulement
+                        // article/_list.html.twig au lieu de la page complète.
                         'X-Requested-With':
                             'XMLHttpRequest',
                     },
@@ -217,6 +242,8 @@ document.addEventListener('DOMContentLoaded', () => {
             updateInterface(url);
 
             if (updateHistory) {
+                // pushState synchronise la barre d'adresse sans rechargement ;
+                // le bouton Retour est géré plus bas avec l'événement popstate.
                 window.history.pushState(
                     {},
                     '',
@@ -226,8 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error(error);
 
-            // Retour au fonctionnement classique
-            // si AJAX rencontre une erreur.
+            // Amélioration progressive : en cas d'échec AJAX, une navigation
+            // classique laisse Symfony rendre la même recherche côté serveur.
             window.location.assign(
                 url.toString()
             );
@@ -241,6 +268,8 @@ document.addEventListener('DOMContentLoaded', () => {
     searchForm.addEventListener(
         'submit',
         (event) => {
+            // On bloque la soumission HTML uniquement parce que loadResults()
+            // prend le relais. Sans ce script, le formulaire fonctionne normalement.
             event.preventDefault();
 
             const url = new URL(
@@ -318,6 +347,8 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
     window.addEventListener('popstate', () => {
+        // Recharge l'état correspondant à l'URL lorsque l'utilisateur navigue
+        // dans l'historique, sans ajouter une nouvelle entrée avec pushState.
         loadResults(
             new URL(window.location.href),
             false

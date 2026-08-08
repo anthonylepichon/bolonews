@@ -1,3 +1,5 @@
+# Présentation : configuration générale du FrameworkBundle.
+# Rôle : régler le secret, les sessions, le routeur et les comportements fondamentaux de Symfony.
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
     secret: '%env(APP_SECRET)%'

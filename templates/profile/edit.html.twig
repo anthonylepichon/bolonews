@@ -1,77 +1,101 @@
+{# Présentation : page de modification du profil.
+   Rôle : afficher le formulaire du pseudo, de l'e-mail, de l'avatar et du mot de passe facultatif. #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Modifier mon profil - Bolonews{% endblock %}
 
 {% block body %}
+    {# Zone : contenu principal de la modification du profil. #}
     <main>
-        <header>
-            <h1>Modifier mon profil</h1>
-            <p>Mettez à jour les informations de votre compte.</p>
+        {# Zone : en-tête de présentation de la page. #}
+        <header class="home-masthead">
+            <h1 class="home-masthead__title">Bolonews</h1>
+            <p class="home-masthead__subtitle">
+                Mettez à jour vos informations et votre image de profil.
+            </p>
         </header>
 
-        <section aria-labelledby="profile-edit-title">
-            <h2 id="profile-edit-title">Mes informations</h2>
+        {# Zone : carte regroupant toutes les informations modifiables. #}
+        <div class="container profile-edit-content">
+            <section class="form-card form-card--profile" aria-labelledby="profile-edit-title">
+                <h2 id="profile-edit-title">Modifier mon profil</h2>
+                <p class="form-card__intro">Personnalisez les informations associées à votre compte.</p>
 
-            <div>
-                {% if user.avatarFilename %}
-                    <img
-                        src="{{ asset(
-                            'images/avatars/' ~ user.avatarFilename
-                        ) }}"
-                        alt="Avatar actuel de {{ user.pseudo }}"
-                    >
-                {% else %}
-                    <span aria-hidden="true">
-                        {{ user.pseudo|slice(0, 2)|upper }}
-                    </span>
-                {% endif %}
-
-                <p>Avatar actuel</p>
-            </div>
-
-            {{ form_start(profileForm) }}
-
-                {{ form_errors(profileForm) }}
-
-                {{ form_row(profileForm.pseudo, {
-                    label: 'Pseudonyme'
-                }) }}
-
-                {{ form_row(profileForm.avatar, {
-                    label: 'Choisir une nouvelle image',
-                    help: 'JPG ou PNG, 2 Mo maximum. Laissez vide pour conserver l’image actuelle.'
-                }) }}
-
-                {{ form_row(profileForm.email, {
-                    label: 'Adresse e-mail'
-                }) }}
-
-                {{ form_errors(profileForm.newPassword) }}
-
-                {{ form_row(
-                    profileForm.newPassword.first,
-                    {
-                        label: 'Nouveau mot de passe',
-                        help: 'Laissez ce champ vide pour conserver le mot de passe actuel.'
+                {# Zone : formulaire Symfony du profil.
+                   image-preview.js détecte cet attribut et affiche le nouvel avatar
+                   avant son envoi au serveur. #}
+                {{ form_start(profileForm, {
+                    attr: {
+                        class: 'app-form',
+                        'data-image-preview-form': ''
                     }
-                ) }}
+                }) }}
+                    {{ form_errors(profileForm) }}
 
-                {{ form_row(
-                    profileForm.newPassword.second,
-                    {
-                        label: 'Confirmation du nouveau mot de passe'
-                    }
-                ) }}
+                    {# Zone : avatar actuel, choix d'un fichier et aperçu local. #}
+                    <fieldset class="profile-fieldset">
+                        {# fieldset/legend regroupent sémantiquement les champs ;
+                           profile-fieldset est une mise en forme SCSS ajoutée. #}
+                        <legend>Photo de profil</legend>
+                        <div class="profile-avatar-editor">
+                            {% if user.avatarFilename %}
+                                <img
+                                    class="image-preview image-preview--profile"
+                                    data-image-preview
+                                    src="{{ asset('images/avatars/' ~ user.avatarFilename) }}"
+                                    alt="Avatar actuel de {{ user.pseudo }}"
+                                >
+                            {% else %}
+                                <span class="image-preview image-preview--profile" data-image-preview aria-hidden="true">
+                                    {{ user.pseudo|slice(0, 2)|upper }}
+                                </span>
+                            {% endif %}
 
-                <button type="submit">
-                    Enregistrer les modifications
-                </button>
+                            <div class="profile-avatar-editor__control">
+                                {{ form_label(profileForm.avatar, 'Choisir une nouvelle image') }}
+                                {{ form_widget(profileForm.avatar, {
+                                    attr: {
+                                        class: 'form-control',
+                                        'data-image-input': '',
+                                        'data-preview-shape': 'avatar'
+                                    }
+                                }) }}
+                                {{ form_errors(profileForm.avatar) }}
+                                <div class="form-text">JPG ou PNG · 2 Mo maximum</div>
+                            </div>
+                        </div>
+                    </fieldset>
 
-            {{ form_end(profileForm) }}
+                    {# Zone : identité publique et adresse de connexion. #}
+                    <fieldset class="profile-fieldset">
+                        <legend>Informations du compte</legend>
+                        {{ form_row(profileForm.pseudo, {label: 'Pseudonyme'}) }}
+                        {{ form_row(profileForm.email, {label: 'Adresse e-mail'}) }}
+                    </fieldset>
 
-            <a href="{{ path('app_profile_index') }}">
-                Annuler et revenir à mon espace
-            </a>
-        </section>
+                    {# Zone : changement facultatif et confirmé du mot de passe. #}
+                    <fieldset class="profile-fieldset">
+                        <legend>Sécurité</legend>
+                        {{ form_errors(profileForm.newPassword) }}
+                        {{ form_row(profileForm.newPassword.first, {
+                            label: 'Nouveau mot de passe (facultatif)',
+                            attr: {placeholder: 'Laissez vide pour conserver le mot de passe'}
+                        }) }}
+                        {{ form_row(profileForm.newPassword.second, {
+                            label: 'Confirmation du nouveau mot de passe',
+                            attr: {placeholder: 'Confirmez uniquement en cas de modification'}
+                        }) }}
+                    </fieldset>
+
+                    {# Zone : validation ou abandon des modifications. #}
+                    <div class="form-actions">
+                        {# Les deux variantes Bootstrap donnent une hiérarchie claire :
+                           action principale jaune, annulation seulement encadrée. #}
+                        <button class="btn btn-primary" type="submit">Enregistrer les modifications</button>
+                        <a class="btn btn-outline-primary" href="{{ path('app_profile_index') }}">Annuler</a>
+                    </div>
+                {{ form_end(profileForm) }}
+            </section>
+        </div>
     </main>
 {% endblock %}

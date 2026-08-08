@@ -1,3 +1,5 @@
+# Présentation : configuration de la compilation Sass sans npm.
+# Rôle : déclarer app.scss comme feuille racine contenant Bootstrap et les styles Bolonews.
 symfonycasts_sass:
     root_sass:
         - 'assets/styles/app.scss'

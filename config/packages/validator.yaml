@@ -1,3 +1,5 @@
+# Présentation : configuration du composant Validator.
+# Rôle : déterminer la manière dont Symfony charge et applique les contraintes de validation.
 framework:
     validation:
         # Enables validator auto-mapping support.

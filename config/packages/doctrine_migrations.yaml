@@ -1,3 +1,5 @@
+# Présentation : configuration de Doctrine Migrations.
+# Rôle : indiquer où Symfony trouve les classes qui font évoluer le schéma SQL.
 doctrine_migrations:
     migrations_paths:
         # namespace is arbitrary but should be different from App\Migrations

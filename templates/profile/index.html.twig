@@ -1,99 +1,60 @@
+{# Présentation : tableau de bord personnel du membre connecté.
+   Rôle : séparer ses publications et brouillons et donner accès à leurs actions. #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Mon espace - Bolonews{% endblock %}
 
 {% block body %}
+    {% set publishedArticles = articles|filter(article => article.isPublished) %}
+    {% set draftArticles = articles|filter(article => not article.isPublished) %}
+    {# Le filtrage Twig sépare les deux états pour la présentation ; les droits et
+       la sélection des articles appartenant au membre restent gérés côté PHP. #}
+
+    {# Zone : contenu principal de l'espace personnel. #}
     <main>
-        <header>
-            <h1>Mon espace</h1>
-            <p>Gérez votre profil et vos publications.</p>
+        {# Zone : en-tête présentant la fonction de la page. #}
+        <header class="home-masthead">
+            <h1 class="home-masthead__title">Bolonews</h1>
+            <p class="home-masthead__subtitle">Gérez votre espace utilisateur.</p>
         </header>
 
-        <section aria-labelledby="profile-title">
-            <h2 id="profile-title">Mon profil</h2>
-            <a href="{{ path('app_article_new') }}">
-                Ajouter un article
-            </a>
+        {# Zone : tableau de bord des actions et articles du membre. #}
+        <div class="container dashboard-content">
+            {# Zone : raccourcis vers la création d'article et le profil. #}
+            <div class="dashboard-toolbar">
+                <a class="btn btn-primary" href="{{ path('app_article_new') }}">Créer un article</a>
+                <a class="btn btn-outline-primary" href="{{ path('app_profile_edit') }}">Modifier mon profil</a>
+            </div>
 
-            {% if user.avatarFilename %}
-                <img
-                    src="{{ asset(
-                        'images/avatars/' ~ user.avatarFilename
-                    ) }}"
-                    alt="Avatar de {{ user.pseudo }}"
-                >
-            {% else %}
-                <span aria-hidden="true">
-                    {{ user.pseudo|slice(0, 2)|upper }}
-                </span>
-            {% endif %}
+            {# Zone : articles actuellement visibles par le public. #}
+            <section class="dashboard-section" aria-labelledby="published-title">
+                <h2 id="published-title">Mes articles publiés</h2>
+                {# Grille Bootstrap responsive : une colonne sur petit écran,
+                   deux à partir de lg. La carte est mutualisée dans une partial. #}
+                <div class="row dashboard-grid">
+                    {% for article in publishedArticles %}
+                        <div class="col-12 col-lg-6">
+                            {{ include('article/_dashboard_card.html.twig', {article: article}) }}
+                        </div>
+                    {% else %}
+                        <p class="empty-state">Vous n’avez encore publié aucun article.</p>
+                    {% endfor %}
+                </div>
+            </section>
 
-            <p>{{ user.pseudo }}</p>
-            <p>{{ user.email }}</p>
-            <a href="{{ path('app_profile_edit') }}">
-                Modifier mon profil
-            </a>
-        </section>
-
-        <section aria-labelledby="articles-title">
-            <h2 id="articles-title">Mes articles</h2>
-
-            {% for article in articles %}
-                <article>
-                    <img
-                        src="{{ asset(
-                            'images/articles/' ~ article.imageFilename
-                        ) }}"
-                        alt="Illustration de l’article {{ article.title }}"
-                    >
-
-                    <p>{{ article.category.label }}</p>
-
-                    <p>
-                        {% if article.isPublished %}
-                            Publié
-                        {% else %}
-                            Brouillon
-                        {% endif %}
-                    </p>
-
-                    <h3>{{ article.title }}</h3>
-                    <p>{{ article.chapeau }}</p>
-
-                    <p>
-                        Créé le
-                        {{ article.createdAt|date('d/m/Y à H:i') }}
-
-                        {% if article.updatedAt %}
-                            - Mis à jour le
-                            {{ article.updatedAt|date('d/m/Y à H:i') }}
-                        {% endif %}
-                    </p>
-
-                    <p>
-                        {{ article.comments|length }} commentaire(s) -
-                        {{ article.likes|length }} J’aime
-                    </p>
-
-                    {% if article.isPublished %}
-                        <a href="{{ path(
-                            'app_article_show',
-                            {id: article.id}
-                        ) }}">
-                            Voir l’article
-                        </a>
-                    {% endif %}
-
-                    <a href="{{ path(
-                        'app_article_edit',
-                        {id: article.id}
-                    ) }}">
-                        Éditer
-                    </a>
-                </article>
-            {% else %}
-                <p>Vous n’avez encore créé aucun article.</p>
-            {% endfor %}
-        </section>
+            {# Zone : brouillons privés restant à modifier ou publier. #}
+            <section class="dashboard-section" aria-labelledby="drafts-title">
+                <h2 id="drafts-title">Mes brouillons</h2>
+                <div class="row dashboard-grid">
+                    {% for article in draftArticles %}
+                        <div class="col-12 col-lg-6">
+                            {{ include('article/_dashboard_card.html.twig', {article: article}) }}
+                        </div>
+                    {% else %}
+                        <p class="empty-state">Vous n’avez aucun brouillon.</p>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
     </main>
 {% endblock %}

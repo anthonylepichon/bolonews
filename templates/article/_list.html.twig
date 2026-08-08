@@ -1,51 +1,110 @@
-{% for article in articles %}
-    <article>
-        <img
-            src="{{ asset(
-                'images/articles/' ~ article.imageFilename
-            ) }}"
-            alt="Illustration de l’article {{ article.title }}"
-        >
+{# Présentation : fragment Twig contenant les cartes du catalogue.
+   Rôle : être rendu dans la page complète ou remplacé directement par la réponse AJAX. #}
+{# Zone : grille responsive des résultats. #}
+<div class="row home-latest__grid articles-grid">
+    {% for article in articles %}
+        <div class="col-12 col-lg-6">
+            {# card et les colonnes sont Bootstrap ; latest-article et ses éléments
+               sont les classes SCSS ajoutées pour reproduire la maquette. #}
+            <article class="card latest-article">
+                <img
+                    class="latest-article__image"
+                    src="{{ asset(
+                        'images/articles/' ~ article.imageFilename
+                    ) }}"
+                    alt="Illustration de l’article {{ article.title }}"
+                >
 
-        <p>{{ article.category.label }}</p>
+                <div class="card-body latest-article__body">
+                    <span class="badge article-category">
+                        {{ article.category.label }}
+                    </span>
 
-        <h3>
-            <a href="{{ path(
-                'app_article_show',
-                {id: article.id}
-            ) }}">
-                {{ article.title }}
-            </a>
-        </h3>
+                    <h3 class="latest-article__title">
+                        <a href="{{ path(
+                            'app_article_show',
+                            {id: article.id}
+                        ) }}">
+                            {{ article.title }}
+                        </a>
+                    </h3>
 
-        <p>{{ article.chapeau }}</p>
+                    <div class="latest-article__publication">
+                        <span>
+                            {{ article.author
+                                ? article.author.pseudo
+                                : 'Auteur supprimé'
+                            }}
+                        </span>
 
-        <p>
-            {{ article.author
-                ? article.author.pseudo
-                : 'Auteur supprimé'
-            }}
-        </p>
+                        <time datetime="{{ article.createdAt|date('c') }}">
+                            Publié le
+                            {{ article.createdAt|date('d/m/Y à H:i') }}
+                        </time>
+                    </div>
 
-        <p>
-            Publié le
-            {{ article.createdAt|date('d/m/Y à H:i') }}
-        </p>
+                    <p class="latest-article__summary">
+                        {{ article.chapeau }}
+                    </p>
 
-        <p>
-            {{ article.comments|length }} commentaire(s) -
-            {{ article.likes|length }} J’aime
-        </p>
+                    <a
+                        class="latest-article__read-more"
+                        href="{{ path(
+                            'app_article_show',
+                            {id: article.id}
+                        ) }}"
+                    >
+                        <span>Lire la suite</span>
+                        <img
+                            src="{{ asset(
+                                'images/icons/arrow-right.svg'
+                            ) }}"
+                            alt=""
+                            aria-hidden="true"
+                        >
+                    </a>
 
-        <a href="{{ path(
-            'app_article_show',
-            {id: article.id}
-        ) }}">
-            Lire la suite
-        </a>
-    </article>
-{% else %}
-    <p>
-        Aucun article ne correspond aux critères sélectionnés.
-    </p>
-{% endfor %}
+                    <div
+                        class="article-stats latest-article__stats"
+                        aria-label="Statistiques de l’article"
+                    >
+                        <span
+                            aria-label="{{ article.comments|length }} commentaire(s)"
+                        >
+                            <img
+                                class="article-stat-icon"
+                                src="{{ asset(
+                                    'images/icons/message-circle.svg'
+                                ) }}"
+                                alt=""
+                                aria-hidden="true"
+                            >
+                            {{ article.comments|length }}
+                        </span>
+
+                        <span
+                            aria-label="{{ article.likes|length }} J’aime"
+                        >
+                            <img
+                                class="article-stat-icon"
+                                src="{{ asset(
+                                    'images/icons/heart.svg'
+                                ) }}"
+                                alt=""
+                                aria-hidden="true"
+                            >
+                            {{ article.likes|length }}
+                        </span>
+                    </div>
+                </div>
+            </article>
+        </div>
+    {% else %}
+        {# Zone : message affiché lorsqu'aucun article ne correspond aux filtres. #}
+        <div class="col-12">
+            <p class="alert alert-info mb-0">
+                Aucun article ne correspond aux critères sélectionnés.
+            </p>
+        </div>
+    {% endfor %}
+</div>

@@ -1,194 +1,138 @@
+{# Présentation : interface d'administration des utilisateurs.
+   Rôle : rechercher les comptes et confirmer leur bannissement, réactivation ou suppression. #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Gestion des utilisateurs - Bolonews{% endblock %}
 
 {% block body %}
+    {# Zone : contenu principal de la gestion des utilisateurs. #}
     <main>
-        <header>
-            <h1>Gestion des utilisateurs</h1>
-            <p>
-                Recherchez, bannissez, réactivez ou supprimez un compte.
-            </p>
+        {# Zone : en-tête présentant la gestion des accès. #}
+        <header class="home-masthead">
+            <h1 class="home-masthead__title">Bolonews</h1>
+            <p class="home-masthead__subtitle">Gérez les comptes et les droits d’accès à Bolonews.</p>
         </header>
 
-        <section aria-labelledby="user-search-title">
-            <h2 id="user-search-title">
-                Rechercher un utilisateur
-            </h2>
+        {# Zone : carte de recherche et tableau des comptes. #}
+        <div class="container management-page-content">
+            <section class="management-card" aria-labelledby="users-title">
+                <h2 id="users-title">Gestion des utilisateurs</h2>
+                <p>{{ users|length }} compte(s) affiché(s)</p>
 
-            <form
-                action="{{ path('app_admin_user_index') }}"
-                method="get"
-                role="search"
-            >
-                <label for="user-search">
-                    Nom d’utilisateur ou adresse e-mail
-                </label>
+                {# Zone : recherche des utilisateurs par pseudo ou e-mail.
+                   form-label/form-control sont Bootstrap ; management-search__*
+                   précise la disposition et les icônes dans le SCSS du projet. #}
+                <form class="management-search" action="{{ path('app_admin_user_index') }}" method="get" role="search">
+                    <label class="form-label" for="user-search">Rechercher un utilisateur</label>
+                    <div class="management-search__control">
+                        <input class="form-control" type="search" id="user-search" name="recherche" value="{{ search }}" placeholder="Nom ou adresse e-mail">
+                        {% if search is not empty %}
+                            <a href="{{ path('app_admin_user_index') }}" aria-label="Réinitialiser la recherche">
+                                <img src="{{ asset('images/icons/x.svg') }}" alt="">
+                            </a>
+                        {% else %}
+                            <button type="submit" aria-label="Lancer la recherche">
+                                <img src="{{ asset('images/icons/search.svg') }}" alt="">
+                            </button>
+                        {% endif %}
+                    </div>
+                </form>
 
-                <div>
-                    <input
-                        type="search"
-                        id="user-search"
-                        name="recherche"
-                        value="{{ search }}"
-                        placeholder="Pseudo ou adresse e-mail"
-                    >
+                {% if search is not empty %}
+                    {# Zone : rappel du critère actuellement appliqué. #}
+                    <p class="management-search__result">Filtre actif : « {{ search }} »</p>
+                {% endif %}
 
-                    <button
-                        type="submit"
-                        aria-label="Lancer la recherche"
-                    >
-                        <span aria-hidden="true">🔍</span>
-                    </button>
-
-                    {% if search is not empty %}
-                        <a
-                            href="{{ path('app_admin_user_index') }}"
-                            aria-label="Réinitialiser la recherche"
-                        >
-                            <span aria-hidden="true">×</span>
-                        </a>
-                    {% endif %}
+                {# Zone : tableau responsive des comptes et actions disponibles.
+                   table-responsive est le conteneur Bootstrap qui autorise un
+                   défilement horizontal plutôt que de tronquer le tableau. #}
+                <div class="table-responsive management-table-wrapper">
+                    <table class="management-table">
+                        <caption class="visually-hidden">Liste des comptes Bolonews</caption>
+                        <thead>
+                            <tr><th scope="col">Nom</th><th scope="col">Adresse e-mail</th><th scope="col">Rôle</th><th scope="col">Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>
+                                        <div class="management-user">
+                                            {% if user.avatarFilename %}
+                                                <img class="comment-avatar" src="{{ asset('images/avatars/' ~ user.avatarFilename) }}" alt="Avatar de {{ user.pseudo }}">
+                                            {% else %}
+                                                <span class="comment-avatar" aria-hidden="true">{{ user.pseudo|slice(0, 2)|upper }}</span>
+                                            {% endif %}
+                                            <span>{{ user.pseudo }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        {% if 'ROLE_ADMIN' in user.roles %}Administrateur{% elseif user.isBanned %}Compte banni{% else %}Utilisateur{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if 'ROLE_ADMIN' not in user.roles %}
+                                            {# Ces boutons n'envoient rien directement : les
+                                               attributs data-bs-* ouvrent la bonne modale. #}
+                                            <div class="management-actions">
+                                                <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#ban-user-{{ user.id }}">{{ user.isBanned ? 'Réactiver' : 'Bannir' }}</button>
+                                                <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#delete-user-{{ user.id }}">Supprimer</button>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">Compte protégé</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="4">Aucun utilisateur ne correspond à cette recherche.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-            </form>
+            </section>
 
-            {% if search is not empty %}
-                <p>
-                    Résultats correspondant à
-                    « {{ search }} »
-                </p>
-            {% endif %}
-        </section>
-
-        <section aria-labelledby="users-title">
-            <h2 id="users-title">Comptes utilisateurs</h2>
-
-            <table>
-                <caption>
-                    Liste des comptes Bolonews
-                </caption>
-
-                <thead>
-                    <tr>
-                        <th scope="col">Utilisateur</th>
-                        <th scope="col">Adresse e-mail</th>
-                        <th scope="col">Statut</th>
-                        <th scope="col">Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for user in users %}
-                        <tr>
-                            <td>
-                                {% if user.avatarFilename %}
-                                    <img
-                                        src="{{ asset(
-                                            'images/avatars/'
-                                            ~ user.avatarFilename
-                                        ) }}"
-                                        alt="Avatar de {{ user.pseudo }}"
-                                    >
-                                {% else %}
-                                    <span aria-hidden="true">
-                                        {{ user.pseudo
-                                            |slice(0, 2)
-                                            |upper
-                                        }}
-                                    </span>
-                                {% endif %}
-
-                                {{ user.pseudo }}
-                            </td>
-
-                            <td>{{ user.email }}</td>
-
-                            <td>
-                                {% if 'ROLE_ADMIN' in user.roles %}
-                                    Administrateur
-                                {% elseif user.isBanned %}
-                                    Compte banni
-                                {% else %}
-                                    Compte actif
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if 'ROLE_ADMIN' not in user.roles %}
-                                    <form
-                                        method="post"
-                                        action="{{ path(
-                                            'app_admin_user_toggle_ban',
-                                            {id: user.id}
-                                        ) }}"
-                                    >
-                                        <input
-                                            type="hidden"
-                                            name="_token"
-                                            value="{{ csrf_token(
-                                                'toggle-ban' ~ user.id
-                                            ) }}"
-                                        >
-
-                                        <button type="submit">
-                                            {{ user.isBanned
-                                                ? 'Réactiver'
-                                                : 'Bannir'
-                                            }}
-                                        </button>
-                                    </form>
-
-                                    <details>
-                                        <summary>Supprimer</summary>
-
-                                        <p>
-                                            Supprimer définitivement
-                                            le compte « {{ user.pseudo }} » ?
-                                        </p>
-
-                                        <p>
-                                            Cette action est irréversible.
-                                        </p>
-
-                                        <form
-                                            method="post"
-                                            action="{{ path(
-                                                'app_admin_user_delete',
-                                                {id: user.id}
-                                            ) }}"
-                                        >
-                                            <input
-                                                type="hidden"
-                                                name="_token"
-                                                value="{{ csrf_token(
-                                                    'delete-user' ~ user.id
-                                                ) }}"
-                                            >
-
-                                            <button type="submit">
-                                                Supprimer le compte
-                                            </button>
-                                        </form>
-                                    </details>
-                                {% else %}
-                                    Actions protégées
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="4">
-                                Aucun utilisateur ne correspond
-                                à cette recherche.
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </section>
-
-        <a href="{{ path('app_admin') }}">
-            Retour à l’espace administrateur
-        </a>
+            {# Zone : retour vers le tableau de bord général. #}
+            <a class="btn btn-outline-primary management-back" href="{{ path('app_admin') }}">Retour à l’espace administrateur</a>
+        </div>
     </main>
+
+    {% for user in users %}
+        {% if 'ROLE_ADMIN' not in user.roles %}
+            {# Zone : confirmations de bannissement et de suppression du compte.
+               Une paire de modales Bootstrap est générée avec un id unique par
+               compte. Chaque confirmation envoie un POST protégé par CSRF. #}
+            <div class="modal fade" id="ban-user-{{ user.id }}" tabindex="-1" aria-labelledby="ban-user-title-{{ user.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="ban-user-title-{{ user.id }}">{{ user.isBanned ? 'Réactiver' : 'Bannir' }} le compte « {{ user.pseudo }} » ?</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body"><p class="mb-0">{{ user.isBanned ? 'L’utilisateur pourra à nouveau se connecter.' : 'L’utilisateur ne pourra plus se connecter tant que son compte restera banni.' }}</p></div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Annuler</button>
+                        <form method="post" action="{{ path('app_admin_user_toggle_ban', {id: user.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('toggle-ban' ~ user.id) }}">
+                            <button class="btn btn-primary" type="submit">Confirmer</button>
+                        </form>
+                    </div>
+                </div></div>
+            </div>
+
+            <div class="modal fade" id="delete-user-{{ user.id }}" tabindex="-1" aria-labelledby="delete-user-title-{{ user.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="delete-user-title-{{ user.id }}">Supprimer le compte « {{ user.pseudo }} » ?</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body"><p class="mb-0"><strong>Cette action est irréversible.</strong></p></div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Annuler</button>
+                        <form method="post" action="{{ path('app_admin_user_delete', {id: user.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete-user' ~ user.id) }}">
+                            <button class="btn btn-danger" type="submit">Supprimer le compte</button>
+                        </form>
+                    </div>
+                </div></div>
+            </div>
+        {% endif %}
+    {% endfor %}
 {% endblock %}

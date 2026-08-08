@@ -1,3 +1,5 @@
+# Présentation : configuration de Symfony UX Turbo.
+# Rôle : préparer les interactions Turbo et leur protection CSRF lorsqu'elles sont utilisées.
 # Enable stateless CSRF protection for forms and logins/logouts
 framework:
     csrf_protection:

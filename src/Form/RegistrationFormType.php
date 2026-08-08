@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : définition Symfony Form de l'inscription.
+ * Rôle : recueillir le compte, l'avatar, le mot de passe confirmé et l'acceptation des conditions.
+ */
+
 namespace App\Form;
 
 use App\Entity\User;
@@ -13,12 +18,27 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 class RegistrationFormType extends AbstractType
 {
+    // -----------------------
+    // ATTRIBUTS
+    // -----------------------
+    // Aucun attribut : la structure est construite à partir des arguments reçus.
+
+    // -----------------------
+    // METHODES
+    // -----------------------
+
+    /**
+     * Rôle : Déclare les champs, widgets et contraintes du formulaire Symfony.
+     * Paramètre : `$builder` (FormBuilderInterface) : le constructeur du formulaire Symfony ; `$options` (array) : les options disponibles pour configurer le formulaire.
+     * Retour : Aucun (`void`).
+     */
     public function buildForm(
         FormBuilderInterface $builder,
         array $options
@@ -41,7 +61,8 @@ class RegistrationFormType extends AbstractType
                 ],
             ])
             ->add('avatar', FileType::class, [
-                // Le fichier n’est pas directement enregistré dans l’entité.
+                // Le fichier n'est pas directement enregistré dans l'entité :
+                // RegistrationController stocke seulement son nom final.
                 'mapped' => false,
                 'required' => false,
                 'attr' => [
@@ -62,9 +83,18 @@ class RegistrationFormType extends AbstractType
                 'attr' => [
                     'autocomplete' => 'email',
                 ],
+                'constraints' => [
+                    new NotBlank(
+                        message: 'Veuillez saisir une adresse e-mail.'
+                    ),
+                    new Email(
+                        message: 'Veuillez saisir une adresse e-mail valide.'
+                    ),
+                ],
             ])
             ->add('plainPassword', RepeatedType::class, [
-                // Le mot de passe en clair ne doit jamais être stocké.
+                // Le mot de passe en clair ne doit jamais être stocké. Le champ
+                // non mappé est haché dans le contrôleur avant la persistance.
                 'mapped' => false,
                 'type' => PasswordType::class,
                 'invalid_message' => 'Les mots de passe ne correspondent pas.',
@@ -92,6 +122,8 @@ class RegistrationFormType extends AbstractType
                 ],
             ])
             ->add('agreeTerms', CheckboxType::class, [
+                // Cette case sert uniquement à la validation du formulaire ;
+                // elle ne correspond donc à aucune colonne de la table user.
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue(
@@ -101,6 +133,11 @@ class RegistrationFormType extends AbstractType
             ]);
     }
 
+    /**
+     * Rôle : Définit la classe de données et les options acceptées par le formulaire.
+     * Paramètre : `$resolver` (OptionsResolver) : le résolveur chargé des options du formulaire.
+     * Retour : Aucun (`void`).
+     */
     public function configureOptions(
         OptionsResolver $resolver
     ): void {

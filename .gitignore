@@ -1,4 +1,7 @@
 
+# Présentation : liste des fichiers que Git ne doit pas versionner.
+# Rôle : exclure secrets locaux, cache, dépendances et fichiers générés.
+
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php

@@ -1,3 +1,5 @@
+# Présentation : route technique de déconnexion.
+# Rôle : permettre au firewall d'intercepter app_logout sans traitement manuel dans le contrôleur.
 _security_logout:
     resource: security.route_loader.logout
     type: service

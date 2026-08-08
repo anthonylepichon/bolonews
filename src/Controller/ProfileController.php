@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : contrôleur de l'espace personnel d'un utilisateur connecté.
+ * Rôle : afficher ses articles et traiter les modifications de son profil.
+ */
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -20,11 +25,25 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 #[IsGranted('ROLE_USER')]
 final class ProfileController extends AbstractController
 {
+    // -----------------------
+    // ATTRIBUTS
+    // -----------------------
+    // Aucun attribut : les dépendances sont injectées dans les méthodes.
+
+    // -----------------------
+    // METHODES
+    // -----------------------
+
     #[Route(
         '/mon-espace',
         name: 'app_profile_index',
         methods: ['GET']
     )]
+    /**
+     * Rôle : Affiche le profil du membre connecté et ses articles.
+     * Paramètre : `$articleRepository` (ArticleRepository) : le repository utilisé pour interroger les articles.
+     * Retour : Une réponse HTTP contenant la page ou la redirection.
+     */
     public function index(
         ArticleRepository $articleRepository
     ): Response {
@@ -46,6 +65,11 @@ final class ProfileController extends AbstractController
         name: 'app_profile_edit',
         methods: ['GET', 'POST']
     )]
+    /**
+     * Rôle : Affiche et traite la modification des informations du profil.
+     * Paramètre : `$request` (Request) : la requête HTTP et les données envoyées ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance ; `$passwordHasher` (UserPasswordHasherInterface) : le service Symfony de hachage des mots de passe ; `$slugger` (SluggerInterface) : le service qui sécurise les noms de fichiers.
+     * Retour : Une réponse HTTP contenant la page ou la redirection.
+     */
     public function edit(
         Request $request,
         EntityManagerInterface $entityManager,
@@ -63,6 +87,8 @@ final class ProfileController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Le champ avatar est volontairement non mappé : le fichier est
+            // déplacé dans public/, puis seul son nom est enregistré en base.
             /** @var UploadedFile|null $avatarFile */
             $avatarFile = $form->get('avatar')->getData();
 
@@ -117,6 +143,8 @@ final class ProfileController extends AbstractController
                 is_string($newPassword)
                 && $newPassword !== ''
             ) {
+                // Le nouveau mot de passe est facultatif et n'est jamais stocké
+                // en clair : le hasher Symfony produit la valeur persistée.
                 $user->setPassword(
                     $passwordHasher->hashPassword(
                         $user,
@@ -125,7 +153,8 @@ final class ProfileController extends AbstractController
                 );
             }
 
-            // L’utilisateur existe déjà : persist() n’est pas nécessaire.
+            // L'utilisateur existe déjà et reste suivi par Doctrine : flush()
+            // suffit, aucun nouvel persist() n'est nécessaire.
             $entityManager->flush();
 
             $this->addFlash(

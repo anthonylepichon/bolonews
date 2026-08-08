@@ -1,3 +1,5 @@
+# Présentation : conventions d'édition partagées entre les éditeurs de code.
+# Rôle : harmoniser encodage, fins de ligne et indentation du projet.
 # editorconfig.org
 
 root = true

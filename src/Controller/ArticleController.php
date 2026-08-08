@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : contrôleur principal du cycle de vie des articles.
+ * Rôle : lister, filtrer, afficher, créer, modifier, publier et supprimer selon les droits.
+ */
+
 namespace App\Controller;
 
 use App\Entity\Article;
@@ -23,16 +28,32 @@ use App\Repository\CategoryRepository;
 
 final class ArticleController extends AbstractController
 {
+    // -----------------------
+    // ATTRIBUTS
+    // -----------------------
+    // Aucun attribut : les dépendances sont injectées dans les méthodes.
+
+    // -----------------------
+    // METHODES
+    // -----------------------
+
     #[Route(
         '/articles',
         name: 'app_article_index',
         methods: ['GET']
     )]
+    /**
+     * Rôle : Affiche les articles publiés selon les filtres, en page complète ou en AJAX.
+     * Paramètre : `$request` (Request) : la requête HTTP et les données envoyées ; `$articleRepository` (ArticleRepository) : le repository utilisé pour interroger les articles ; `$categoryRepository` (CategoryRepository) : le repository utilisé pour interroger les catégories.
+     * Retour : Une réponse HTTP contenant la page ou la redirection.
+     */
     public function index(
         Request $request,
         ArticleRepository $articleRepository,
         CategoryRepository $categoryRepository
     ): Response {
+        // Les filtres arrivent dans l'URL sous forme de paramètres GET afin que
+        // la recherche reste partageable et fonctionne même sans JavaScript.
         $search = $request
             ->query
             ->getString('recherche');
@@ -42,6 +63,8 @@ final class ArticleController extends AbstractController
             ->getInt('categorie');
 
         if ($categoryId === 0) {
+            // getInt() renvoie 0 lorsque le paramètre est absent : le repository
+            // attend null pour comprendre qu'aucune catégorie n'est sélectionnée.
             $categoryId = null;
         }
 
@@ -52,6 +75,8 @@ final class ArticleController extends AbstractController
             );
 
         if ($request->isXmlHttpRequest()) {
+            // Une requête AJAX ne remplace que la liste des résultats. La page
+            // complète reste rendue lors d'une navigation HTML classique.
             return $this->render(
                 'article/_list.html.twig',
                 [
@@ -82,6 +107,11 @@ final class ArticleController extends AbstractController
         methods: ['GET', 'POST']
     )]
     #[IsGranted('ROLE_USER')]
+    /**
+     * Rôle : Affiche et traite la création d’un article ou d’un brouillon.
+     * Paramètre : `$request` (Request) : la requête HTTP et les données envoyées ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance ; `$slugger` (SluggerInterface) : le service qui sécurise les noms de fichiers.
+     * Retour : Une réponse HTTP contenant la page ou la redirection.
+     */
     public function new(
         Request $request,
         EntityManagerInterface $entityManager,
@@ -97,6 +127,8 @@ final class ArticleController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Le champ image n'est pas mappé sur l'entité : le contrôleur traite
+            // le fichier puis conserve uniquement son nom dans la base de données.
             /** @var UploadedFile|null $imageFile */
             $imageFile = $form->get('image')->getData();
 
@@ -148,6 +180,8 @@ final class ArticleController extends AbstractController
                 ->get('publication_action');
 
             $article->setIsPublished(
+                // Les deux boutons partagent le formulaire, mais leur valeur
+                // décide entre l'enregistrement d'un brouillon et la publication.
                 $publicationAction === 'publish'
             );
 
@@ -181,6 +215,11 @@ final class ArticleController extends AbstractController
         methods: ['GET', 'POST']
     )]
     #[IsGranted('ROLE_USER')]
+    /**
+     * Rôle : Affiche et traite la modification et l’état de publication d’un article.
+     * Paramètre : `$id` (int) : l’identifiant de la ressource demandée ; `$request` (Request) : la requête HTTP et les données envoyées ; `$articleRepository` (ArticleRepository) : le repository utilisé pour interroger les articles ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance ; `$slugger` (SluggerInterface) : le service qui sécurise les noms de fichiers.
+     * Retour : Une réponse HTTP contenant la page ou la redirection.
+     */
     public function edit(
         int $id,
         Request $request,
@@ -202,6 +241,8 @@ final class ArticleController extends AbstractController
         $isAuthor = $article->getAuthor()?->getId()
             === $user->getId();
 
+        // Un auteur ne modifie que ses articles ; le rôle administrateur garde
+        // un droit de modération sur tous les articles.
         if (
             !$isAuthor
             && !$this->isGranted('ROLE_ADMIN')
@@ -215,7 +256,7 @@ final class ArticleController extends AbstractController
             ArticleFormType::class,
             $article,
             [
-                // L’image actuelle peut être conservée.
+                // En modification, l'image actuelle peut être conservée.
                 'image_required' => false,
             ]
         );
@@ -227,6 +268,8 @@ final class ArticleController extends AbstractController
             $imageFile = $form->get('image')->getData();
 
             if ($imageFile instanceof UploadedFile) {
+                // Le nom enregistré n'est remplacé que si un nouveau fichier a
+                // réellement été choisi par l'utilisateur.
                 try {
                     $imageFilename =
                         $this->uploadArticleImage(
@@ -305,15 +348,17 @@ final class ArticleController extends AbstractController
         requirements: ['id' => '\d+'],
         methods: ['GET']
     )]
+    /**
+     * Rôle : Affiche un article et prépare ses interactions selon le visiteur.
+     * Paramètre : `$id` (int) : l’identifiant de la ressource demandée ; `$articleRepository` (ArticleRepository) : le repository utilisé pour interroger les articles ; `$likeRepository` (ArticleLikeRepository) : le repository utilisé pour interroger les J’aime.
+     * Retour : Une réponse HTTP contenant la page ou la redirection.
+     */
     public function show(
         int $id,
         ArticleRepository $articleRepository,
         ArticleLikeRepository $likeRepository
     ): Response {
-        $article = $articleRepository->findOneBy([
-            'id' => $id,
-            'isPublished' => true,
-        ]);
+        $article = $articleRepository->find($id);
 
         if ($article === null) {
             throw $this->createNotFoundException(
@@ -322,10 +367,26 @@ final class ArticleController extends AbstractController
         }
 
         $user = $this->getUser();
+        $canEdit = $user instanceof User
+            && (
+                $article->getAuthor()?->getId() === $user->getId()
+                || $this->isGranted('ROLE_ADMIN')
+            );
+
+        // Répondre « introuvable » évite de révéler l'existence d'un brouillon
+        // à une personne qui n'est ni son auteur ni administratrice.
+        if (!$article->isPublished() && !$canEdit) {
+            throw $this->createNotFoundException(
+                'Article introuvable.'
+            );
+        }
+
         $hasLiked = false;
         $commentForm = null;
 
-        if ($user instanceof User) {
+        if ($article->isPublished() && $user instanceof User) {
+            // Ces données interactives ne sont préparées que pour un membre
+            // connecté et uniquement sur un article effectivement publié.
             $hasLiked = $likeRepository->count([
                 'user' => $user,
                 'article' => $article,
@@ -352,6 +413,7 @@ final class ArticleController extends AbstractController
                 'article' => $article,
                 'commentForm' => $commentForm,
                 'hasLiked' => $hasLiked,
+                'canEdit' => $canEdit,
             ]
         );
     }
@@ -363,11 +425,18 @@ final class ArticleController extends AbstractController
         methods: ['POST']
     )]
     #[IsGranted('ROLE_ADMIN')]
+    /**
+     * Rôle : Supprime définitivement un article après contrôle du rôle et du jeton CSRF.
+     * Paramètre : `$request` (Request) : la requête HTTP et les données envoyées ; `$article` (Article) : l’article concerné par l’action ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance.
+     * Retour : Une réponse HTTP contenant la page ou la redirection.
+     */
     public function delete(
         Request $request,
         Article $article,
         EntityManagerInterface $entityManager
     ): Response {
+        // Le rôle est vérifié par IsGranted ; le jeton CSRF protège en plus la
+        // requête POST contre une suppression déclenchée depuis un autre site.
         $tokenIsValid = $this->isCsrfTokenValid(
             'delete-article'.$article->getId(),
             $request->getPayload()->getString(
@@ -407,6 +476,8 @@ final class ArticleController extends AbstractController
         UploadedFile $imageFile,
         SluggerInterface $slugger
     ): string {
+        // Le nom fourni par le navigateur est nettoyé, puis rendu unique pour
+        // éviter les caractères dangereux et l'écrasement d'une image existante.
         $originalFilename = pathinfo(
             $imageFile->getClientOriginalName(),
             PATHINFO_FILENAME

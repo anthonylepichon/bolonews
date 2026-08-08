@@ -1,31 +1,25 @@
+{# Présentation : page dédiée à la modification d'une catégorie.
+   Rôle : afficher le formulaire Symfony et l'action de suppression associée. #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Modifier une catégorie - Bolonews{% endblock %}
 
 {% block body %}
+    {# Zone : contenu principal de la modification d'une catégorie. #}
     <main>
-        <header>
-            <h1>Modifier une catégorie</h1>
-            <p>
-                Renommez la catégorie « {{ category.label }} ».
-            </p>
+        {# Zone : en-tête de la page dédiée. #}
+        <header class="home-masthead">
+            <h1 class="home-masthead__title">Bolonews</h1>
+            <p class="home-masthead__subtitle">Renommez une catégorie existante.</p>
         </header>
 
-        <section aria-labelledby="category-edit-title">
-            <h2 id="category-edit-title">
-                Nouveau libellé
-            </h2>
-
-            {{ include(
-                'admin_category/_form.html.twig',
-                {
-                    button_label: 'Enregistrer les modifications'
-                }
-            ) }}
-
-            <a href="{{ path('app_admin_category_index') }}">
-                Annuler et revenir aux catégories
-            </a>
-        </section>
+        {# Zone : carte contenant le formulaire et la suppression. #}
+        <div class="container form-page-content">
+            <section class="form-card" aria-labelledby="category-edit-title">
+                <h2 id="category-edit-title">Modifier « {{ category.label }} »</h2>
+                {{ include('admin_category/_form.html.twig', {button_label: 'Enregistrer les modifications'}) }}
+                <a class="btn btn-outline-primary mt-3" href="{{ path('app_admin_category_index') }}">Annuler</a>
+            </section>
+        </div>
     </main>
 {% endblock %}

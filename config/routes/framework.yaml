@@ -1,3 +1,5 @@
+# Présentation : routes techniques du FrameworkBundle en développement.
+# Rôle : rendre disponibles les pages d'erreur détaillées de Symfony.
 when@dev:
     _errors:
         resource: '@FrameworkBundle/Resources/config/routing/errors.php'

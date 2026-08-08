@@ -1,7 +1,11 @@
-{{ form_start(form) }}
+{# Présentation : fragment Twig du formulaire de catégorie.
+   Rôle : mutualiser le champ et le bouton entre les pages d'ajout et de modification. #}
+{# Zone : formulaire Symfony et erreurs générales. #}
+{{ form_start(form, {attr: {class: 'app-form'}}) }}
 
     {{ form_errors(form) }}
 
+    {# Zone : champ du libellé de la catégorie. #}
     {{ form_row(form.label, {
         label: 'Libellé de la catégorie',
         attr: {
@@ -9,7 +13,8 @@
         }
     }) }}
 
-    <button type="submit">
+    {# Zone : validation du formulaire. #}
+    <button class="btn btn-primary" type="submit">
         {{ button_label|default('Enregistrer') }}
     </button>
 

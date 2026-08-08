@@ -1,4 +1,6 @@
 
+# Présentation : adaptations locales des services Docker.
+# Rôle : exposer les ports et réglages utiles pendant le développement.
 services:
 ###> doctrine/doctrine-bundle ###
   database:

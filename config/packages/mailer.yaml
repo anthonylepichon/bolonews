@@ -1,3 +1,5 @@
+# Présentation : configuration du composant Mailer.
+# Rôle : lire le DSN qui serait utilisé pour l'envoi de courriers électroniques.
 framework:
     mailer:
         dsn: '%env(MAILER_DSN)%'

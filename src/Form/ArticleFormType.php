@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : définition Symfony Form des champs d'un article.
+ * Rôle : construire le formulaire commun à la création/modification et appliquer ses validations.
+ */
+
 namespace App\Form;
 
 use App\Entity\Article;
@@ -17,6 +22,20 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ArticleFormType extends AbstractType
 {
+    // -----------------------
+    // ATTRIBUTS
+    // -----------------------
+    // Aucun attribut : la structure est construite à partir des arguments reçus.
+
+    // -----------------------
+    // METHODES
+    // -----------------------
+
+    /**
+     * Rôle : Déclare les champs, widgets et contraintes du formulaire Symfony.
+     * Paramètre : `$builder` (FormBuilderInterface) : le constructeur du formulaire Symfony ; `$options` (array) : les options disponibles pour configurer le formulaire.
+     * Retour : Aucun (`void`).
+     */
     public function buildForm(
         FormBuilderInterface $builder,
         array $options
@@ -34,6 +53,8 @@ class ArticleFormType extends AbstractType
                 ],
             ])
             ->add('category', EntityType::class, [
+                // EntityType transforme les objets Category en choix de liste ;
+                // choice_label indique la propriété affichée à l'utilisateur.
                 'class' => Category::class,
                 'choice_label' => 'label',
                 'placeholder' => 'Choisissez une catégorie',
@@ -62,7 +83,8 @@ class ArticleFormType extends AbstractType
                 ],
             ])
             ->add('image', FileType::class, [
-                // L’entité stocke le nom du fichier, pas le fichier lui-même.
+                // mapped=false : l'entité stocke le nom, pas l'objet fichier.
+                // Le contrôleur prend donc en charge le déplacement du fichier.
                 'mapped' => false,
                 'required' => $options['image_required'],
                 'attr' => [
@@ -82,13 +104,19 @@ class ArticleFormType extends AbstractType
             ]);
     }
 
+    /**
+     * Rôle : Définit la classe de données et les options acceptées par le formulaire.
+     * Paramètre : `$resolver` (OptionsResolver) : le résolveur chargé des options du formulaire.
+     * Retour : Aucun (`void`).
+     */
     public function configureOptions(
         OptionsResolver $resolver
     ): void {
         $resolver->setDefaults([
             'data_class' => Article::class,
 
-            // Obligatoire à la création, facultative en modification.
+            // Cette option personnalisée rend l'image obligatoire à la création,
+            // mais facultative lorsque l'article possède déjà une illustration.
             'image_required' => true,
         ]);
 

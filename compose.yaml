@@ -1,3 +1,5 @@
+# Présentation : services Docker proposés par la recette Symfony.
+# Rôle : fournir une base de données conteneurisée lorsque cet environnement est utilisé.
 
 services:
 ###> doctrine/doctrine-bundle ###

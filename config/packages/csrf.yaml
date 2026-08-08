@@ -1,3 +1,5 @@
+# Présentation : configuration de la protection CSRF.
+# Rôle : protéger les formulaires et actions sensibles contre les soumissions externes.
 # Enable stateless CSRF protection for forms and logins/logouts
 framework:
     form:

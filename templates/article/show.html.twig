@@ -1,169 +1,347 @@
+{# Présentation : page de lecture détaillée d'un article.
+   Rôle : afficher contenu, auteur, statistiques, like AJAX, commentaires et actions autorisées. #}
 {% extends 'base.html.twig' %}
 
 {% block title %}{{ article.title }} - Bolonews{% endblock %}
 
 {% block body %}
-    <main>
-        <article>
-            <p>{{ article.category.label }}</p>
-
-            <h1>{{ article.title }}</h1>
-            <p>{{ article.chapeau }}</p>
-
-            <img
-                src="{{ asset('images/articles/' ~ article.imageFilename) }}"
-                alt="Illustration de l’article {{ article.title }}"
-            >
-
-            <p>
-                Écrit par
-                {{ article.author
-                    ? article.author.pseudo
-                    : 'Auteur supprimé'
-                }}
-            </p>
-
-            <p>
-                Publié le {{ article.createdAt|date('d/m/Y à H:i') }}
-
-                {% if article.updatedAt %}
-                    - Mis à jour le
-                    {{ article.updatedAt|date('d/m/Y à H:i') }}
-                {% endif %}
-            </p>
-
-            <div>
-                {{ article.content|nl2br }}
-            </div>
-
-            <div>
-                <p>
-                    {{ article.comments|length }} commentaire(s)
+    {# Zone : contenu principal de la lecture d'un article. #}
+    <main class="article-detail-page">
+        {# Zone : en-tête éditorial du site. #}
+        <header class="home-masthead">
+            <div class="container">
+                <p class="home-masthead__title">Bolonews</p>
+                <p class="home-masthead__subtitle">
+                    L’actualité qui se déguste, à lire chaque jour.
                 </p>
-
-                {% if app.user %}
-                    <button
-                        type="button"
-                        data-like-button
-                        data-like-url="{{ path(
-                            'app_like_toggle',
-                            {id: article.id}
-                        ) }}"
-                        data-like-token="{{ csrf_token(
-                            'like-article' ~ article.id
-                        ) }}"
-                        aria-pressed="{{ hasLiked ? 'true' : 'false' }}"
-                    >
-                        <span
-                            data-like-icon
-                            aria-hidden="true"
-                        >
-                            {{ hasLiked ? '♥' : '♡' }}
-                        </span>
-
-                        <span data-like-label>
-                            {{ hasLiked ? 'Je n’aime plus' : 'J’aime' }}
-                        </span>
-
-                        <span data-like-count>
-                            {{ article.likes|length }}
-                        </span>
-                    </button>
-
-                    <p
-                        data-like-error
-                        role="alert"
-                        hidden
-                    ></p>
-                {% else %}
-                    <p>
-                        <span aria-hidden="true">♡</span>
-                        {{ article.likes|length }} J’aime
-                    </p>
-
-                    <a href="{{ path('app_login') }}">
-                        Se connecter pour aimer cet article
-                    </a>
-                {% endif %}
             </div>
-        </article>
+        </header>
 
-        <section aria-labelledby="comments-title">
-            <h2 id="comments-title">Commentaires</h2>
-            {% if app.user and commentForm %}
-                <div>
-                    <h3>Ajouter un commentaire</h3>
-
-                    {{ form_start(commentForm) }}
-
-                        {{ form_errors(commentForm) }}
-
-                        {{ form_row(commentForm.content, {
-                            label: 'Votre commentaire',
-                            attr: {
-                                placeholder: 'Écrivez votre commentaire…'
-                            }
-                        }) }}
-
-                        <button type="submit">
-                            Publier le commentaire
-                        </button>
-
-                    {{ form_end(commentForm) }}
-                </div>
-            {% else %}
-                <div>
-                    <p>
-                        Vous devez être connecté pour publier
-                        un commentaire.
-                    </p>
-
-                    <a href="{{ path('app_login') }}">
-                        Se connecter
-                    </a>
+        <div class="container article-detail-content">
+            {% if not article.isPublished %}
+                {# Zone : avertissement réservé à l'aperçu d'un brouillon.
+                   alert-warning est la variante Bootstrap choisie pour distinguer
+                   clairement un aperçu privé d'une publication publique. #}
+                <div class="alert alert-warning" role="status">
+                    <strong>Aperçu du brouillon :</strong>
+                    cette page n’est visible que par son auteur et l’administrateur.
                 </div>
             {% endif %}
 
-            {% for comment in article.comments %}
-                <article>
-                    {% if comment.author and comment.author.avatarFilename %}
-                        <img
-                            src="{{ asset(
-                                'images/avatars/' ~ comment.author.avatarFilename
-                            ) }}"
-                            alt="Avatar de {{ comment.author.pseudo }}"
-                        >
-                    {% else %}
-                        <span aria-hidden="true">
-                            {{ comment.author
-                                ? comment.author.pseudo|slice(0, 2)|upper
-                                : '?'
+            {# Zone : carte contenant l'intégralité de l'article. #}
+            <article class="card article-detail">
+                {# Zone : informations éditoriales — catégorie, titre, dates et chapeau. #}
+                <header>
+                    <span class="badge article-detail__category">
+                        {{ article.category.label }}
+                    </span>
+
+                    <h1 class="article-detail__title">
+                        {{ article.title }}
+                    </h1>
+
+                    <p class="article-detail__date">
+                        <time datetime="{{ article.createdAt|date('c') }}">
+                            Publié le
+                            {{ article.createdAt|date('d/m/Y à H:i') }}
+                        </time>
+
+                        {% if article.updatedAt %}
+                            <span>
+                                — Mis à jour le
+                                <time datetime="{{ article.updatedAt|date('c') }}">
+                                    {{ article.updatedAt|date('d/m/Y à H:i') }}
+                                </time>
+                            </span>
+                        {% endif %}
+                    </p>
+
+                    <p class="article-detail__lead">
+                        {{ article.chapeau }}
+                    </p>
+                </header>
+
+                {# Zone : illustration principale de l'article. #}
+                <img
+                    class="article-detail__image"
+                    src="{{ asset(
+                        'images/articles/' ~ article.imageFilename
+                    ) }}"
+                    alt="Illustration de l’article {{ article.title }}"
+                >
+
+                {# Zone : corps rédactionnel de l'article. #}
+                <div class="article-detail__body-copy">
+                    {{ article.content|nl2br }}
+                </div>
+
+                {# Zone : auteur, statistiques et interaction « J'aime ». #}
+                <footer class="article-detail__footer">
+                    <div class="article-detail__author">
+                        {% if
+                            article.author
+                            and article.author.avatarFilename
+                        %}
+                            <img
+                                class="article-avatar"
+                                src="{{ asset(
+                                    'images/avatars/'
+                                    ~ article.author.avatarFilename
+                                ) }}"
+                                alt="Avatar de {{ article.author.pseudo }}"
+                            >
+                        {% else %}
+                            <span
+                                class="article-avatar"
+                                aria-hidden="true"
+                            >
+                                {{ article.author
+                                    ? article.author.pseudo|slice(0, 2)|upper
+                                    : '?'
+                                }}
+                            </span>
+                        {% endif %}
+
+                        <span>
+                            {{ article.author
+                                ? article.author.pseudo
+                                : 'Auteur supprimé'
                             }}
                         </span>
+                    </div>
+
+                    <div
+                        class="article-stats article-detail__stats"
+                        aria-label="Statistiques de l’article"
+                    >
+                        <span
+                            aria-label="{{ article.comments|length }} commentaire(s)"
+                        >
+                            <img
+                                class="article-stat-icon"
+                                src="{{ asset(
+                                    'images/icons/message-circle.svg'
+                                ) }}"
+                                alt=""
+                                aria-hidden="true"
+                            >
+                            {{ article.comments|length }}
+                        </span>
+
+                        {% if app.user %}
+                            {# Ces data-* transmettent au module AJAX l'URL, le jeton
+                               CSRF et les éléments à actualiser après le clic. #}
+                            <button
+                                class="article-like-button"
+                                type="button"
+                                data-like-button
+                                data-like-url="{{ path(
+                                    'app_like_toggle',
+                                    {id: article.id}
+                                ) }}"
+                                data-like-token="{{ csrf_token(
+                                    'like-article' ~ article.id
+                                ) }}"
+                                aria-pressed="{{ hasLiked ? 'true' : 'false' }}"
+                            >
+                                <img
+                                    class="article-stat-icon"
+                                    src="{{ asset('images/icons/heart.svg') }}"
+                                    alt=""
+                                    aria-hidden="true"
+                                >
+
+                                <span data-like-count>
+                                    {{ article.likes|length }}
+                                </span>
+
+                                <span
+                                    class="visually-hidden"
+                                    data-like-label
+                                >
+                                    {{ hasLiked ? 'Je n’aime plus' : 'J’aime' }}
+                                </span>
+                            </button>
+                        {% else %}
+                            <span
+                                aria-label="{{ article.likes|length }} J’aime"
+                            >
+                                <img
+                                    class="article-stat-icon"
+                                    src="{{ asset('images/icons/heart.svg') }}"
+                                    alt=""
+                                    aria-hidden="true"
+                                >
+                                {{ article.likes|length }}
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    {% if app.user %}
+                        <p
+                            class="article-like-error"
+                            data-like-error
+                            role="alert"
+                            hidden
+                        ></p>
                     {% endif %}
+                </footer>
 
+                {% if canEdit %}
+                    {# Zone : action de modification réservée à l'auteur ou à l'administrateur.
+                       L'affichage complète le contrôle d'autorisation du contrôleur ;
+                       masquer le bouton ne remplace jamais une vérification serveur. #}
+                    <div class="article-detail__edit-action">
+                        <a class="btn btn-outline-primary" href="{{ path('app_article_edit', {id: article.id}) }}">
+                            Éditer l’article
+                        </a>
+                    </div>
+                {% endif %}
+            </article>
+        </div>
+
+        {% if article.isPublished %}
+        {# Zone : commentaires et formulaire de participation d'un article publié. #}
+        <section
+            class="container article-comments"
+            aria-labelledby="comments-title"
+        >
+            <h2
+                class="article-comments__title"
+                id="comments-title"
+            >
+                Commentaires
+            </h2>
+
+            {# Zone : liste des commentaires déjà publiés. #}
+            <div class="article-comments__list">
+                {% for comment in article.comments %}
+                    <article class="card article-comment">
+                        <header class="article-comment__header">
+                            <div class="article-comment__author">
+                                {% if
+                                    comment.author
+                                    and comment.author.avatarFilename
+                                %}
+                                    <img
+                                        class="comment-avatar"
+                                        src="{{ asset(
+                                            'images/avatars/'
+                                            ~ comment.author.avatarFilename
+                                        ) }}"
+                                        alt="Avatar de {{ comment.author.pseudo }}"
+                                    >
+                                {% else %}
+                                    <span
+                                        class="comment-avatar"
+                                        aria-hidden="true"
+                                    >
+                                        {{ comment.author
+                                            ? comment.author.pseudo|slice(0, 2)|upper
+                                            : '?'
+                                        }}
+                                    </span>
+                                {% endif %}
+
+                                <strong>
+                                    {{ comment.author
+                                        ? comment.author.pseudo
+                                        : 'Utilisateur supprimé'
+                                    }}
+                                </strong>
+                            </div>
+
+                            <time datetime="{{ comment.createdAt|date('c') }}">
+                                Publié le
+                                {{ comment.createdAt|date('d/m/Y à H:i') }}
+                            </time>
+                        </header>
+
+                        <p class="article-comment__content">
+                            {{ comment.content }}
+                        </p>
+                    </article>
+                {% else %}
+                    <p class="alert alert-info mb-0">
+                        Aucun commentaire pour le moment.
+                    </p>
+                {% endfor %}
+            </div>
+
+            {# Zone : formulaire de commentaire ou invitation à se connecter. #}
+            <div class="article-comment-action">
+                {% if app.user and commentForm %}
+                    <h3 class="article-comment-action__title">
+                        Votre commentaire
+                    </h3>
+
+                    {# Symfony Form produit les champs et le jeton CSRF. form-control,
+                       mb-3 et btn appliquent la présentation Bootstrap. #}
+                    {{ form_start(commentForm, {
+                        attr: {class: 'comment-form'}
+                    }) }}
+                        {{ form_errors(commentForm) }}
+
+                        <div class="mb-3">
+                            {{ form_label(
+                                commentForm.content,
+                                'Votre commentaire',
+                                {label_attr: {class: 'visually-hidden'}}
+                            ) }}
+
+                            {{ form_errors(commentForm.content) }}
+
+                            {{ form_widget(commentForm.content, {
+                                attr: {
+                                    class: 'form-control',
+                                    rows: 5,
+                                    placeholder: 'Écrivez votre commentaire…'
+                                }
+                            }) }}
+                        </div>
+
+                        <button
+                            class="btn btn-primary"
+                            type="submit"
+                        >
+                            Publier le commentaire
+                        </button>
+                    {{ form_end(commentForm) }}
+                {% else %}
                     <p>
-                        {{ comment.author
-                            ? comment.author.pseudo
-                            : 'Utilisateur supprimé'
-                        }}
+                        Connectez-vous pour publier un commentaire.
                     </p>
 
-                    <p>{{ comment.content }}</p>
+                    {# Utilitaires Bootstrap : flex-wrap autorise le retour à la
+                       ligne et gap-3 maintient l'espace entre les actions. #}
+                    <div class="d-flex flex-wrap gap-3">
+                        <a
+                            class="btn btn-outline-primary"
+                            href="{{ path('app_login') }}"
+                        >
+                            Se connecter pour commenter
+                        </a>
 
-                    <p>
-                        Publié le {{ comment.createdAt|date('d/m/Y à H:i') }}
-                    </p>
-                </article>
-            {% else %}
-                <p>Aucun commentaire pour le moment.</p>
-            {% endfor %}
+                        <a
+                            class="btn btn-outline-primary"
+                            href="{{ path('app_article_index') }}"
+                        >
+                            Retour aux articles
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
         </section>
-
-        <p>
-            <a href="{{ path('app_article_index') }}">
-                Retour aux articles
-            </a>
-        </p>
+        {% else %}
+            {# Zone : actions disponibles depuis l'aperçu d'un brouillon.
+               Un brouillon n'accepte ni commentaire ni like : seules les actions
+               de gestion autorisées sont proposées à son auteur ou à l'admin. #}
+            <section class="container article-comments">
+                <div class="d-flex flex-wrap gap-3">
+                    <a class="btn btn-primary" href="{{ path('app_article_edit', {id: article.id}) }}">Modifier ce brouillon</a>
+                    <a class="btn btn-outline-primary" href="{{ is_granted('ROLE_ADMIN') ? path('app_admin') : path('app_profile_index') }}">Retour à mon espace</a>
+                </div>
+            </section>
+        {% endif %}
     </main>
 {% endblock %}

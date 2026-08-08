@@ -1,3 +1,5 @@
+{# Présentation : squelette HTML commun à toutes les pages.
+   Rôle : charger les assets, afficher navigation, messages flash, contenu et pied de page. #}
 <!DOCTYPE html>
 <html lang="fr">
     <head>
@@ -9,10 +11,14 @@
         </title>
 
         {% block stylesheets %}
+            {# AssetMapper sert directement le fichier SCSS ; SassBundle le compile
+               et app.scss importe Bootstrap avant les styles propres à Bolonews. #}
             <link rel="stylesheet" href="{{ asset('styles/app.scss') }}">
         {% endblock %}
 
         {% block javascripts %}
+            {# Importmap charge app.js sans npm. Ce point d'entrée importe le
+               JavaScript Bootstrap et les modules interactifs du projet. #}
             {% block importmap %}
                 {{ importmap('app') }}
             {% endblock %}
@@ -35,130 +41,203 @@
         {% endif %}
     </head>
 
-    <body>
+    <body class="d-flex flex-column min-vh-100">
         {% set currentRoute = app.request.attributes.get('_route') %}
 
-        <header>
-            <nav aria-label="Navigation principale">
-                <a href="{{ path('app_home') }}">
-                    Bolonews
-                </a>
+        {# Zone : en-tête global contenant la navigation principale et le compte. #}
+        <header class="site-header">
+            {# navbar-expand-lg est le comportement Bootstrap : menu replié sous
+               lg, menu horizontal à partir de lg. site-header/site-main-nav sont
+               des compléments visuels définis manuellement dans le SCSS. #}
+            <nav
+                class="navbar navbar-expand-lg"
+                aria-label="Navigation principale"
+            >
+                <div class="container-fluid p-0">
+                    <a
+                        class="navbar-brand"
+                        href="{{ path('app_home') }}"
+                    >
+                        Bolonews
+                    </a>
 
-                <ul>
-                    <li>
-                        <a
-                            href="{{ path('app_home') }}"
-                            {% if currentRoute == 'app_home' %}
-                                aria-current="page"
-                            {% endif %}
-                        >
-                            Accueil
-                        </a>
-                    </li>
+                    <button
+                        class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        {# Ces attributs data-bs-* relient le bouton au composant
+                           Collapse de Bootstrap, sans JavaScript spécifique. #}
+                        data-bs-target="#main-navigation"
+                        aria-controls="main-navigation"
+                        aria-expanded="false"
+                        aria-label="Afficher ou masquer la navigation"
+                    >
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
 
-                    <li>
-                        <a
-                            href="{{ path('app_article_index') }}"
-                            {% if currentRoute starts with 'app_article_' %}
-                                aria-current="page"
-                            {% endif %}
-                        >
-                            Articles
-                        </a>
-                    </li>
-
-                    <li>
-                        <a
-                            href="{{ path('app_contact') }}"
-                            {% if currentRoute == 'app_contact' %}
-                                aria-current="page"
-                            {% endif %}
-                        >
-                            Contact
-                        </a>
-                    </li>
-                </ul>
-
-                <ul>
-                    {% if app.user %}
-                        {% if is_granted('ROLE_ADMIN') %}
-                            <li>
+                    <div
+                        class="collapse navbar-collapse"
+                        id="main-navigation"
+                    >
+                        <ul class="navbar-nav mx-lg-auto site-main-nav">
+                            <li class="nav-item">
                                 <a
-                                    href="{{ path('app_admin') }}"
-                                    {% if currentRoute starts with 'app_admin' %}
+                                    class="nav-link"
+                                    href="{{ path('app_home') }}"
+                                    {% if currentRoute == 'app_home' %}
                                         aria-current="page"
                                     {% endif %}
                                 >
-                                    Administration
+                                    Home
                                 </a>
                             </li>
-                        {% endif %}
-                        
-                        <li>
-                            <a
-                                href="{{ path('app_profile_index') }}"
-                                {% if currentRoute starts with 'app_profile_' %}
-                                    aria-current="page"
-                                {% endif %}
-                            >
-                                Mon espace
-                            </a>
-                        </li>
 
-                        <li>
-                            {% if app.user.avatarFilename %}
-                                <img
-                                    src="{{ asset(
-                                        'images/avatars/'
-                                        ~ app.user.avatarFilename
-                                    ) }}"
-                                    alt="Avatar de {{ app.user.pseudo }}"
+                            <li class="nav-item">
+                                <a
+                                    class="nav-link"
+                                    href="{{ path('app_article_index') }}"
+                                    {% if currentRoute starts with 'app_article_' %}
+                                        aria-current="page"
+                                    {% endif %}
                                 >
-                            {% else %}
-                                <span aria-hidden="true">
-                                    {{ app.user.pseudo|slice(0, 2)|upper }}
-                                </span>
-                            {% endif %}
-                        </li>
+                                    Articles
+                                </a>
+                            </li>
 
-                        <li>
-                            <a href="{{ path('app_logout') }}">
-                                Me déconnecter
-                            </a>
-                        </li>
-                    {% else %}
-                        <li>
-                            <a
-                                href="{{ path('app_login') }}"
-                                {% if currentRoute == 'app_login' %}
-                                    aria-current="page"
+                            <li class="nav-item">
+                                <a
+                                    class="nav-link"
+                                    href="{{ path('app_contact') }}"
+                                    {% if currentRoute == 'app_contact' %}
+                                        aria-current="page"
+                                    {% endif %}
+                                >
+                                    Contact
+                                </a>
+                            </li>
+                        </ul>
+
+                        <ul
+                            class="navbar-nav ms-lg-auto align-items-lg-center site-account-nav"
+                        >
+                            {% if app.user %}
+                                {# Le contenu du menu dépend du compte authentifié ;
+                                   les contrôleurs restent responsables des droits. #}
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <li class="nav-item">
+                                        <a
+                                            class="nav-link"
+                                            href="{{ path('app_admin') }}"
+                                            {% if currentRoute starts with 'app_admin' %}
+                                                aria-current="page"
+                                            {% endif %}
+                                        >
+                                            Administration
+                                        </a>
+                                    </li>
                                 {% endif %}
-                            >
-                                Se connecter
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
+
+                                {% if not is_granted('ROLE_ADMIN') %}
+                                    <li class="nav-item">
+                                        <a
+                                            class="nav-link"
+                                            href="{{ path('app_profile_index') }}"
+                                            {% if currentRoute starts with 'app_profile_' %}
+                                                aria-current="page"
+                                            {% endif %}
+                                        >
+                                            Mon espace
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                <li
+                                    class="nav-item d-flex align-items-center px-lg-2"
+                                >
+                                    {% if app.user.avatarFilename %}
+                                        <img
+                                            class="account-avatar"
+                                            src="{{ asset(
+                                                'images/avatars/'
+                                                ~ app.user.avatarFilename
+                                            ) }}"
+                                            alt="Avatar de {{ app.user.pseudo }}"
+                                        >
+                                    {% else %}
+                                        <span
+                                            class="account-avatar"
+                                            aria-hidden="true"
+                                        >
+                                            {{ app.user.pseudo|slice(0, 2)|upper }}
+                                        </span>
+                                    {% endif %}
+                                </li>
+
+                                <li class="nav-item">
+                                    <a
+                                        class="nav-link"
+                                        href="{{ path('app_logout') }}"
+                                    >
+                                        Me déconnecter
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="nav-item">
+                                    <a
+                                        class="nav-link"
+                                        href="{{ path('app_login') }}"
+                                        {% if currentRoute == 'app_login' %}
+                                            aria-current="page"
+                                        {% endif %}
+                                    >
+                                        Se connecter
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
             </nav>
         </header>
 
-                {% for type, messages in app.flashes %}
-            {% for message in messages %}
-                <div
-                    role="{{ type == 'error' ? 'alert' : 'status' }}"
-                    data-flash-type="{{ type }}"
-                >
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endfor %}
+        {# Zone : messages temporaires envoyés par les contrôleurs après une action. #}
+        {% set flashMessages = app.flashes %}
 
+        {% if flashMessages is not empty %}
+            <div class="container mt-3">
+                {% for type, messages in flashMessages %}
+                    {% set alertType = type == 'error' ? 'danger' : type %}
+
+                    {% for message in messages %}
+                        {# Alert et btn-close sont fournis par Bootstrap. Le type
+                           métier error est converti en variante Bootstrap danger. #}
+                        <div
+                            class="alert alert-{{ alertType }} alert-dismissible fade show"
+                            role="{{ type == 'error' ? 'alert' : 'status' }}"
+                            data-flash-type="{{ type }}"
+                        >
+                            {{ message }}
+
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert"
+                                aria-label="Fermer le message"
+                            ></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {# Zone : contenu propre à chaque page qui étend ce template. #}
         {% block body %}{% endblock %}
 
-        <footer>
+        {# Zone : pied de page commun. mt-auto le pousse en bas grâce au flex du body. #}
+        <footer class="site-footer mt-auto">
             <p>
                 Projet Symfony créé par Anthony LE PICHON
-                dans le cadre d’une formation
+                dans le cadre d'une formation
             </p>
         </footer>
     </body>

@@ -1,3 +1,5 @@
+# Présentation : configuration d'AssetMapper.
+# Rôle : rendre les ressources de assets/ accessibles au navigateur sans chaîne npm.
 framework:
     asset_mapper:
         # The paths to make available to the asset mapper.

@@ -1,92 +1,104 @@
+{# Présentation : page de connexion à l'application.
+   Rôle : fournir au firewall Symfony les identifiants, le souvenir de session et le jeton CSRF. #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Connexion - Bolonews{% endblock %}
 
 {% block body %}
+    {# Zone : contenu principal de la page de connexion. #}
     <main>
-        <header>
-            <h1>Se connecter</h1>
-            <p>Accédez à votre espace Bolonews.</p>
+        {# Zone : en-tête éditorial de l'authentification. #}
+        <header class="home-masthead">
+            <h1 class="home-masthead__title">Bolonews</h1>
+            <p class="home-masthead__subtitle">
+                Connectez-vous pour personnaliser votre lecture.
+            </p>
         </header>
 
-        {% if app.user %}
-            <section>
-                <h2>Vous êtes déjà connecté</h2>
-
-                <p>
-                    Votre compte est actuellement connecté avec l’adresse
-                    {{ app.user.userIdentifier }}.
-                </p>
-
-                <a href="{{ path('app_home') }}">
-                    Retour à l’accueil
-                </a>
-
-                <a href="{{ path('app_logout') }}">
-                    Me déconnecter
-                </a>
-            </section>
-        {% else %}
-            <section aria-labelledby="login-title">
-                <h2 id="login-title">Connexion à votre compte</h2>
-
-                {% if error %}
-                    <div role="alert">
-                        Adresse e-mail ou mot de passe incorrect.
+        <div class="container form-page-content form-page-content--login">
+            {% if app.user %}
+                {# Zone : état présenté lorsqu'une session est déjà ouverte. #}
+                <section class="form-card" aria-labelledby="already-connected-title">
+                    <h2 id="already-connected-title">Vous êtes déjà connecté</h2>
+                    <p>
+                        Votre compte est connecté avec l’adresse
+                        <strong>{{ app.user.userIdentifier }}</strong>.
+                    </p>
+                    <div class="form-actions">
+                        <a class="btn btn-primary" href="{{ path('app_home') }}">
+                            Retour à l’accueil
+                        </a>
+                        <a class="btn btn-outline-primary" href="{{ path('app_logout') }}">
+                            Me déconnecter
+                        </a>
                     </div>
-                {% endif %}
+                </section>
+            {% else %}
+                {# Zone : carte de connexion présentée aux visiteurs. #}
+                <section class="form-card" aria-labelledby="login-title">
+                    <h2 id="login-title">Connexion</h2>
 
-                <form
-                    action="{{ path('app_login') }}"
-                    method="post"
-                >
-                    <div>
-                        <label for="login-email">
-                            Adresse e-mail
-                        </label>
+                    {% if error %}
+                        {# Zone : message d'échec de l'authentification.
+                           alert-danger est le composant Bootstrap réservé à une
+                           erreur bloquante, avec role=alert pour l'accessibilité. #}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error.messageKey|trans(error.messageData, 'security') }}
+                        </div>
+                    {% endif %}
 
-                        <input
-                            type="email"
-                            id="login-email"
-                            name="_username"
-                            value="{{ last_username }}"
-                            autocomplete="email"
-                            required
-                            autofocus
-                        >
-                    </div>
+                    {# Zone : formulaire HTML interprété par le firewall.
+                       La connexion est volontairement un formulaire HTML : le
+                       firewall Symfony intercepte _username, _password et le CSRF. #}
+                    <form class="app-form" action="{{ path('app_login') }}" method="post">
+                        <div class="mb-4">
+                            <label class="form-label" for="login-email">Adresse e-mail</label>
+                            <input
+                                class="form-control"
+                                type="email"
+                                id="login-email"
+                                name="_username"
+                                value="{{ last_username }}"
+                                autocomplete="email"
+                                placeholder="nom@exemple.fr"
+                                required
+                                autofocus
+                            >
+                        </div>
 
-                    <div>
-                        <label for="login-password">
-                            Mot de passe
-                        </label>
+                        <div class="mb-4">
+                            <label class="form-label" for="login-password">Mot de passe</label>
+                            <input
+                                class="form-control"
+                                type="password"
+                                id="login-password"
+                                name="_password"
+                                autocomplete="current-password"
+                                placeholder="Votre mot de passe"
+                                required
+                            >
+                        </div>
 
-                        <input
-                            type="password"
-                            id="login-password"
-                            name="_password"
-                            autocomplete="current-password"
-                            required
-                        >
-                    </div>
+                        <div class="form-check mb-4">
+                            {# form-check est le composant Bootstrap pour aligner
+                               correctement la case et son libellé. #}
+                            <input class="form-check-input" type="checkbox" id="remember-me" name="_remember_me">
+                            <label class="form-check-label" for="remember-me">Se souvenir de moi</label>
+                        </div>
 
-                    <input
-                        type="hidden"
-                        name="_csrf_token"
-                        value="{{ csrf_token('authenticate') }}"
-                    >
+                        {# Nom de champ attendu par form_login avec enable_csrf. #}
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-                    <button type="submit">
-                        Se connecter
-                    </button>
-                </form>
-                <p>
-                    Vous n’avez pas encore de compte ?
-                    <a href="{{ path('app_register') }}">
-                        Créer un compte
-                    </a>
-                </p>
-            </section>
-        {% endif %}
+                        <button class="btn btn-primary" type="submit">Se connecter</button>
+                    </form>
+
+                    {# Zone : accès alternatif vers la création d'un compte. #}
+                    <p class="form-card__alternate">
+                        Pas encore de compte ?
+                        <a href="{{ path('app_register') }}">M’inscrire</a>
+                    </p>
+                </section>
+            {% endif %}
+        </div>
     </main>
 {% endblock %}

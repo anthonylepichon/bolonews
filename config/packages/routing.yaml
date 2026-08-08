@@ -1,3 +1,5 @@
+# Présentation : options globales du routeur Symfony.
+# Rôle : définir la génération des URL et les contrôles appliqués aux routes.
 framework:
     router:
         # Configure how to generate URLs in non-HTTP contexts, such as CLI commands.

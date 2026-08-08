@@ -1,133 +1,69 @@
+{# Présentation : tableau de bord des articles pour l'administrateur.
+   Rôle : afficher publications et brouillons et donner accès aux différentes gestions. #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Espace administrateur - Bolonews{% endblock %}
 
 {% block body %}
+    {% set publishedArticles = articles|filter(article => article.isPublished) %}
+    {% set draftArticles = articles|filter(article => not article.isPublished) %}
+    {# L'administration reçoit tous les articles du contrôleur, puis les sépare
+       selon leur état pour rendre deux sections clairement identifiables. #}
+
+    {# Zone : contenu principal du tableau de bord administrateur. #}
     <main>
-        <header>
-            <h1>Espace administrateur</h1>
-            <p>
-                Pilotez les publications et les accès de Bolonews.
-            </p>
+        {# Zone : en-tête présentant les outils de pilotage. #}
+        <header class="home-masthead">
+            <h1 class="home-masthead__title">Bolonews</h1>
+            <p class="home-masthead__subtitle">Pilotez les publications et les accès de Bolonews.</p>
         </header>
 
-        <nav aria-label="Gestion de l’administration">
-            <ul>
-                <li>
-                    <a href="{{ path('app_admin_user_index') }}">
-                        Gérer les utilisateurs
-                    </a>
-                </li>
+        {# Zone : navigation et listes de modération. #}
+        <div class="container dashboard-content">
+            {# Les boutons utilisent la base Bootstrap. aria-current signale
+               aussi la rubrique active aux technologies d'assistance. #}
+            {# Zone : navigation entre les rubriques d'administration. #}
+            <nav class="dashboard-admin-nav" aria-label="Gestion de l’administration">
+                <a class="btn btn-outline-primary" aria-current="page" href="{{ path('app_admin') }}">Articles</a>
+                <a class="btn btn-outline-primary" href="{{ path('app_admin_category_index') }}">Catégories</a>
+                <a class="btn btn-outline-primary" href="{{ path('app_admin_user_index') }}">Utilisateurs</a>
+                <a class="btn btn-outline-primary" href="{{ path('app_profile_edit') }}">Mon profil</a>
+            </nav>
 
-                <li>
-                    <a href="{{ path('app_admin_category_index') }}">
-                        Gérer les catégories
-                    </a>
-                </li>
-            </ul>
-        </nav>
+            {# Zone : action principale de création d'un article. #}
+            <div class="dashboard-toolbar">
+                <a class="btn btn-primary" href="{{ path('app_article_new') }}">Créer un article</a>
+            </div>
 
-        <section aria-labelledby="admin-articles-title">
-            <h2 id="admin-articles-title">
-                Tous les articles
-            </h2>
+            {# Zone : publications accessibles au public et modérables. #}
+            <section class="dashboard-section" aria-labelledby="admin-published-title">
+                <h2 id="admin-published-title">Articles publiés</h2>
+                {# Grille Bootstrap : col-12 empile sur mobile et col-lg-6
+                   affiche deux cartes par ligne sur un écran large. #}
+                <div class="row dashboard-grid">
+                    {% for article in publishedArticles %}
+                        <div class="col-12 col-lg-6">
+                            {{ include('article/_dashboard_card.html.twig', {article: article, showAuthor: true}) }}
+                        </div>
+                    {% else %}
+                        <p class="empty-state">Aucun article publié.</p>
+                    {% endfor %}
+                </div>
+            </section>
 
-            {% for article in articles %}
-                <article>
-                    <img
-                        src="{{ asset(
-                            'images/articles/'
-                            ~ article.imageFilename
-                        ) }}"
-                        alt="Illustration de l’article {{ article.title }}"
-                    >
-
-                    <p>{{ article.category.label }}</p>
-
-                    <p>
-                        {% if article.isPublished %}
-                            Publié
-                        {% else %}
-                            Brouillon
-                        {% endif %}
-                    </p>
-
-                    <h3>{{ article.title }}</h3>
-                    <p>{{ article.chapeau }}</p>
-
-                    <p>
-                        Auteur :
-                        {{ article.author
-                            ? article.author.pseudo
-                            : 'Auteur supprimé'
-                        }}
-                    </p>
-
-                    <p>
-                        Créé le
-                        {{ article.createdAt|date('d/m/Y à H:i') }}
-
-                        {% if article.updatedAt %}
-                            - Mis à jour le
-                            {{ article.updatedAt|date('d/m/Y à H:i') }}
-                        {% endif %}
-                    </p>
-
-                    <p>
-                        {{ article.comments|length }} commentaire(s) -
-                        {{ article.likes|length }} J’aime
-                    </p>
-
-                    {% if article.isPublished %}
-                        <a href="{{ path(
-                            'app_article_show',
-                            {id: article.id}
-                        ) }}">
-                            Voir l’article
-                        </a>
-                    {% endif %}
-
-                    <a href="{{ path(
-                        'app_article_edit',
-                        {id: article.id}
-                    ) }}">
-                        Éditer
-                    </a>
-
-                    <details>
-                        <summary>Supprimer</summary>
-
-                        <p>
-                            Supprimer définitivement l’article
-                            « {{ article.title }} » ?
-                        </p>
-
-                        <p>Cette action est irréversible.</p>
-
-                        <form
-                            method="post"
-                            action="{{ path(
-                                'app_article_delete',
-                                {id: article.id}
-                            ) }}"
-                        >
-                            <input
-                                type="hidden"
-                                name="_token"
-                                value="{{ csrf_token(
-                                    'delete-article' ~ article.id
-                                ) }}"
-                            >
-
-                            <button type="submit">
-                                Supprimer l’article
-                            </button>
-                        </form>
-                    </details>
-                </article>
-            {% else %}
-                <p>Aucun article enregistré.</p>
-            {% endfor %}
-        </section>
+            {# Zone : brouillons de tous les auteurs. #}
+            <section class="dashboard-section" aria-labelledby="admin-drafts-title">
+                <h2 id="admin-drafts-title">Brouillons</h2>
+                <div class="row dashboard-grid">
+                    {% for article in draftArticles %}
+                        <div class="col-12 col-lg-6">
+                            {{ include('article/_dashboard_card.html.twig', {article: article, showAuthor: true}) }}
+                        </div>
+                    {% else %}
+                        <p class="empty-state">Aucun brouillon.</p>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
     </main>
 {% endblock %}

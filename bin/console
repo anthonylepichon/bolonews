@@ -1,6 +1,11 @@
 #!/usr/bin/env php
 <?php
 
+/*
+ * Présentation : exécutable de la console Symfony.
+ * Rôle : démarrer le Kernel en ligne de commande pour lancer les commandes du projet.
+ */
+
 use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 

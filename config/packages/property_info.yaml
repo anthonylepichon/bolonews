@@ -1,3 +1,5 @@
+# Présentation : configuration du composant PropertyInfo.
+# Rôle : permettre à Symfony de déterminer les types et métadonnées des propriétés PHP.
 framework:
     property_info:
         with_constructor_extractor: true

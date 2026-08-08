@@ -1,3 +1,5 @@
+# Présentation : configuration de Doctrine DBAL et ORM.
+# Rôle : relier Symfony à la base définie par DATABASE_URL et gérer les entités du dossier src.
 doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'

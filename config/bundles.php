@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : registre des bundles installés dans Symfony.
+ * Rôle : indiquer dans quels environnements chaque extension du framework est activée.
+ */
+
 return [
     Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],
     Doctrine\Bundle\DoctrineBundle\DoctrineBundle::class => ['all' => true],

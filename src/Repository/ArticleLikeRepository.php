@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : repository Doctrine de l'association ArticleLike.
+ * Rôle : rechercher et compter les « J'aime » utilisés par le contrôleur AJAX.
+ */
+
 namespace App\Repository;
 
 use App\Entity\ArticleLike;
@@ -11,6 +16,20 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ArticleLikeRepository extends ServiceEntityRepository
 {
+    // -----------------------
+    // ATTRIBUTS
+    // -----------------------
+    // Aucun attribut déclaré : l'accès à Doctrine est hérité du repository parent.
+
+    // -----------------------
+    // METHODES
+    // -----------------------
+
+    /**
+     * Rôle : Initialise le repository pour l’entité Doctrine correspondante.
+     * Paramètre : `$registry` (ManagerRegistry) : le registre Doctrine donnant accès au gestionnaire de l’entité.
+     * Retour : Aucun : un constructeur initialise l’objet.
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ArticleLike::class);

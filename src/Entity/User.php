@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : entité Doctrine représentant un compte Bolonews.
+ * Rôle : porter l'identité, l'authentification, le profil, les rôles et les relations du membre.
+ */
+
 namespace App\Entity;
 
 use App\Repository\UserRepository;
@@ -22,6 +27,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    // -----------------------
+    // ATTRIBUTS
+    // -----------------------
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -69,6 +78,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: ArticleLike::class, mappedBy: 'user')]
     private Collection $likes;
 
+    // -----------------------
+    // METHODES
+    // -----------------------
+
+    /**
+     * Rôle : Initialise une nouvelle instance et ses valeurs ou collections par défaut.
+     * Paramètre : Aucun.
+     * Retour : Aucun : un constructeur initialise l’objet.
+     */
     public function __construct()
     {
         $this->articles = new ArrayCollection();
@@ -76,16 +94,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->likes = new ArrayCollection();
     }
 
+    /**
+     * Rôle : Renvoie l’identifiant.
+     * Paramètre : Aucun.
+     * Retour : Un entier ou `null` avant la persistance de l’entité.
+     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
+    /**
+     * Rôle : Renvoie l’adresse e-mail.
+     * Paramètre : Aucun.
+     * Retour : Une chaîne de caractères ou `null` lorsqu’aucune valeur n’existe.
+     */
     public function getEmail(): ?string
     {
         return $this->email;
     }
 
+    /**
+     * Rôle : Modifie l’adresse e-mail.
+     * Paramètre : `$email` (string) : la valeur transmise à la méthode.
+     * Retour : L’instance courante afin de permettre l’enchaînement des appels.
+     */
     public function setEmail(string $email): static
     {
         $this->email = $email;
@@ -94,6 +127,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
+     * Rôle : Renvoie l’adresse e-mail utilisée comme identifiant de connexion.
+     * Paramètre : Aucun.
+     * Retour : Une chaîne de caractères.
+     *
      * A visual identifier that represents this user.
      *
      * @see UserInterface
@@ -104,6 +141,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
+     * Rôle : Renvoie les rôles du compte en garantissant le rôle utilisateur minimal.
+     * Paramètre : Aucun.
+     * Retour : Un tableau contenant les données demandées.
+     *
      * @see UserInterface
      */
     public function getRoles(): array
@@ -116,6 +157,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
+     * Rôle : Modifie les rôles.
+     * Paramètre : `$roles` (array) : la valeur transmise à la méthode.
+     * Retour : L’instance courante afin de permettre l’enchaînement des appels.
+     *
      * @param list<string> $roles
      */
     public function setRoles(array $roles): static
@@ -126,6 +171,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
+     * Rôle : Renvoie le mot de passe haché.
+     * Paramètre : Aucun.
+     * Retour : Une chaîne de caractères ou `null` lorsqu’aucune valeur n’existe.
+     *
      * @see PasswordAuthenticatedUserInterface
      */
     public function getPassword(): ?string
@@ -133,6 +182,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
+    /**
+     * Rôle : Modifie le mot de passe haché.
+     * Paramètre : `$password` (string) : la valeur transmise à la méthode.
+     * Retour : L’instance courante afin de permettre l’enchaînement des appels.
+     */
     public function setPassword(string $password): static
     {
         $this->password = $password;
@@ -141,6 +195,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
+     * Rôle : Prépare les données du compte conservées pendant la sérialisation de la session.
+     * Paramètre : Aucun.
+     * Retour : Un tableau contenant les données demandées.
+     *
      * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
      */
     public function __serialize(): array
@@ -152,16 +210,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     #[\Deprecated]
+    /**
+     * Rôle : Efface les éventuelles données sensibles temporaires du compte.
+     * Paramètre : Aucun.
+     * Retour : Aucun (`void`).
+     */
     public function eraseCredentials(): void
     {
         // @deprecated, to be removed when upgrading to Symfony 8
     }
 
+    /**
+     * Rôle : Renvoie le pseudonyme.
+     * Paramètre : Aucun.
+     * Retour : Une chaîne de caractères ou `null` lorsqu’aucune valeur n’existe.
+     */
     public function getPseudo(): ?string
     {
         return $this->pseudo;
     }
 
+    /**
+     * Rôle : Modifie le pseudonyme.
+     * Paramètre : `$pseudo` (string) : la valeur transmise à la méthode.
+     * Retour : L’instance courante afin de permettre l’enchaînement des appels.
+     */
     public function setPseudo(string $pseudo): static
     {
         $this->pseudo = $pseudo;
@@ -169,11 +242,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * Rôle : Indique si le bannissement est actif.
+     * Paramètre : Aucun.
+     * Retour : Un booléen indiquant l’état demandé.
+     */
     public function isBanned(): bool
     {
         return $this->isBanned;
     }
 
+    /**
+     * Rôle : Modifie l’état de bannissement.
+     * Paramètre : `$isBanned` (bool) : la valeur transmise à la méthode.
+     * Retour : L’instance courante afin de permettre l’enchaînement des appels.
+     */
     public function setIsBanned(bool $isBanned): static
     {
         $this->isBanned = $isBanned;
@@ -181,11 +264,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * Rôle : Renvoie le nom du fichier avatar.
+     * Paramètre : Aucun.
+     * Retour : Une chaîne de caractères ou `null` lorsqu’aucune valeur n’existe.
+     */
     public function getAvatarFilename(): ?string
     {
         return $this->avatarFilename;
     }
 
+    /**
+     * Rôle : Modifie le nom du fichier avatar.
+     * Paramètre : `$avatarFilename` (?string) : la valeur transmise à la méthode.
+     * Retour : L’instance courante afin de permettre l’enchaînement des appels.
+     */
     public function setAvatarFilename(?string $avatarFilename): static
     {
         $this->avatarFilename = $avatarFilename;
@@ -194,6 +287,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
+     * Rôle : Renvoie les articles associés.
+     * Paramètre : Aucun.
+     * Retour : La collection Doctrine des objets associés.
+     *
      * @return Collection<int, Article>
      */
     public function getArticles(): Collection
@@ -201,6 +298,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->articles;
     }
 
+    /**
+     * Rôle : Ajoute l’article associé à la relation.
+     * Paramètre : `$article` (Article) : l’article concerné par l’action.
+     * Retour : L’instance courante afin de permettre l’enchaînement des appels.
+     */
     public function addArticle(Article $article): static
     {
         if (!$this->articles->contains($article)) {
@@ -211,6 +313,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * Rôle : Retire l’article associé de la relation.
+     * Paramètre : `$article` (Article) : l’article concerné par l’action.
+     * Retour : L’instance courante afin de permettre l’enchaînement des appels.
+     */
     public function removeArticle(Article $article): static
     {
         if ($this->articles->removeElement($article)) {
@@ -224,6 +331,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
+     * Rôle : Renvoie les commentaires associés.
+     * Paramètre : Aucun.
+     * Retour : La collection Doctrine des objets associés.
+     *
      * @return Collection<int, Comment>
      */
     public function getComments(): Collection
@@ -231,6 +342,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->comments;
     }
 
+    /**
+     * Rôle : Ajoute le commentaire associé à la relation.
+     * Paramètre : `$comment` (Comment) : la valeur transmise à la méthode.
+     * Retour : L’instance courante afin de permettre l’enchaînement des appels.
+     */
     public function addComment(Comment $comment): static
     {
         if (!$this->comments->contains($comment)) {
@@ -241,6 +357,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * Rôle : Retire le commentaire associé de la relation.
+     * Paramètre : `$comment` (Comment) : la valeur transmise à la méthode.
+     * Retour : L’instance courante afin de permettre l’enchaînement des appels.
+     */
     public function removeComment(Comment $comment): static
     {
         if ($this->comments->removeElement($comment)) {
@@ -254,6 +375,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
+     * Rôle : Renvoie les J’aime associés.
+     * Paramètre : Aucun.
+     * Retour : La collection Doctrine des objets associés.
+     *
      * @return Collection<int, ArticleLike>
      */
     public function getLikes(): Collection
@@ -261,6 +386,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->likes;
     }
 
+    /**
+     * Rôle : Ajoute le J’aime associé à la relation.
+     * Paramètre : `$like` (ArticleLike) : la valeur transmise à la méthode.
+     * Retour : L’instance courante afin de permettre l’enchaînement des appels.
+     */
     public function addLike(ArticleLike $like): static
     {
         if (!$this->likes->contains($like)) {
@@ -271,6 +401,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * Rôle : Retire le J’aime associé de la relation.
+     * Paramètre : `$like` (ArticleLike) : la valeur transmise à la méthode.
+     * Retour : L’instance courante afin de permettre l’enchaînement des appels.
+     */
     public function removeLike(ArticleLike $like): static
     {
         if ($this->likes->removeElement($like)) {

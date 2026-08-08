@@ -1,3 +1,5 @@
+# Présentation : configuration du cache Symfony.
+# Rôle : définir les espaces de stockage utilisés pour accélérer l'application.
 framework:
     cache:
         # Unique name of your app: used to compute stable namespaces for cache keys.

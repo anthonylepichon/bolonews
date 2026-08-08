@@ -1,75 +1,92 @@
+{# Présentation : page d'inscription à Bolonews.
+   Rôle : afficher le formulaire Symfony de création de compte et l'aperçu de l'avatar. #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Inscription - Bolonews{% endblock %}
 
 {% block body %}
+    {# Zone : contenu principal de la page d'inscription. #}
     <main>
-        <header>
-            <h1>Créer mon compte</h1>
-            <p>
-                Rejoignez Bolonews pour publier, commenter et aimer
-                des articles.
+        {# Zone : en-tête expliquant les possibilités ouvertes par un compte. #}
+        <header class="home-masthead">
+            <h1 class="home-masthead__title">Bolonews</h1>
+            <p class="home-masthead__subtitle">
+                Créez votre compte pour publier et commenter.
             </p>
         </header>
 
-        <section aria-labelledby="registration-title">
-            <h2 id="registration-title">Mes informations</h2>
+        {# Zone : carte du formulaire de création de compte. #}
+        <div class="container form-page-content">
+            <section class="form-card form-card--registration" aria-labelledby="registration-title">
+                <h2 id="registration-title">Créer mon compte</h2>
 
-            {{ form_start(registrationForm) }}
-
-                {{ form_errors(registrationForm) }}
-
-                {{ form_row(registrationForm.pseudo, {
-                    label: 'Pseudonyme',
+                {# Zone : formulaire Symfony de l'inscription.
+                   Cet attribut active le module d'aperçu sans lier le JavaScript
+                   à une route précise. #}
+                {{ form_start(registrationForm, {
                     attr: {
-                        placeholder: 'Votre pseudonyme'
+                        class: 'app-form',
+                        'data-image-preview-form': ''
                     }
                 }) }}
+                    {{ form_errors(registrationForm) }}
 
-                {{ form_row(registrationForm.avatar, {
-                    label: 'Avatar ou image de profil',
-                    help: 'Image JPG ou PNG, 2 Mo maximum. Sans image, les initiales du pseudonyme seront utilisées.'
-                }) }}
+                    {{ form_row(registrationForm.pseudo, {
+                        label: 'Nom d’utilisateur',
+                        attr: {placeholder: 'Votre pseudonyme'}
+                    }) }}
 
-                {{ form_row(registrationForm.email, {
-                    label: 'Adresse e-mail',
-                    attr: {
-                        placeholder: 'nom@exemple.fr'
-                    }
-                }) }}
+                    {# Zone : avatar facultatif et aperçu avant téléversement. #}
+                    <div class="image-upload-field">
+                        {{ form_label(registrationForm.avatar, 'Avatar ou image de profil') }}
+                        <div class="image-upload-control">
+                            {# Le contenu initial AV est remplacé par une miniature
+                               locale dès qu'un fichier valide est sélectionné. #}
+                            <span class="image-preview image-preview--avatar" data-image-preview aria-hidden="true">AV</span>
+                            {{ form_widget(registrationForm.avatar, {
+                                attr: {
+                                    class: 'form-control',
+                                    'data-image-input': '',
+                                    'data-preview-shape': 'avatar'
+                                }
+                            }) }}
+                        </div>
+                        {{ form_errors(registrationForm.avatar) }}
+                        <div class="form-text">
+                            JPG ou PNG · 2 Mo maximum · Initiales du pseudo utilisées sans image
+                        </div>
+                    </div>
 
-                {{ form_errors(registrationForm.plainPassword) }}
+                    {{ form_row(registrationForm.email, {
+                        label: 'Adresse e-mail',
+                        attr: {placeholder: 'nom@exemple.fr'}
+                    }) }}
 
-                {{ form_row(
-                    registrationForm.plainPassword.first,
-                    {
-                        label: 'Mot de passe'
-                    }
-                ) }}
+                    {# Zone : mot de passe et confirmation contrôlée deux fois. #}
+                    {{ form_errors(registrationForm.plainPassword) }}
+                    {{ form_row(registrationForm.plainPassword.first, {
+                        label: 'Mot de passe',
+                        attr: {placeholder: '8 caractères minimum'}
+                    }) }}
+                    {{ form_row(registrationForm.plainPassword.second, {
+                        label: 'Confirmation du mot de passe',
+                        attr: {placeholder: 'Saisissez à nouveau votre mot de passe'}
+                    }) }}
 
-                {{ form_row(
-                    registrationForm.plainPassword.second,
-                    {
-                        label: 'Confirmation du mot de passe'
-                    }
-                ) }}
+                    {{ form_row(registrationForm.agreeTerms, {
+                        label: 'J’accepte les conditions d’utilisation et la politique de confidentialité.'
+                    }) }}
 
-                {{ form_row(registrationForm.agreeTerms, {
-                    label: 'J’accepte les conditions d’utilisation et la politique de confidentialité.'
-                }) }}
+                    {# btn-primary est un composant Bootstrap dont la couleur et
+                       la hauteur ont été adaptées au Design System Bolonews. #}
+                    <button class="btn btn-primary" type="submit">Créer mon compte</button>
+                {{ form_end(registrationForm) }}
 
-                <button type="submit">
-                    Créer mon compte
-                </button>
-
-            {{ form_end(registrationForm) }}
-
-            <p>
-                Déjà inscrit ?
-                <a href="{{ path('app_login') }}">
-                    Se connecter
-                </a>
-            </p>
-        </section>
+                {# Zone : accès alternatif pour un visiteur déjà inscrit. #}
+                <p class="form-card__alternate">
+                    Déjà inscrit ? <a href="{{ path('app_login') }}">Se connecter</a>
+                </p>
+            </section>
+        </div>
     </main>
 {% endblock %}

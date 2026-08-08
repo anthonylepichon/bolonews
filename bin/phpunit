@@ -1,4 +1,9 @@
 #!/usr/bin/env php
 <?php
 
+/*
+ * Présentation : lanceur PHPUnit fourni au projet.
+ * Rôle : déléguer l'exécution à la version de PHPUnit installée par Composer.
+ */
+
 require dirname(__DIR__).'/vendor/phpunit/phpunit/phpunit';

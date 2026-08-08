@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : contrôleur d'administration des comptes utilisateurs.
+ * Rôle : rechercher, bannir, réactiver ou supprimer un compte selon les règles de sécurité.
+ */
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -18,15 +23,31 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 final class AdminUserController extends AbstractController
 {
+    // -----------------------
+    // ATTRIBUTS
+    // -----------------------
+    // Aucun attribut : les dépendances sont injectées dans les méthodes.
+
+    // -----------------------
+    // METHODES
+    // -----------------------
+
     #[Route(
         '',
         name: 'index',
         methods: ['GET']
     )]
+    /**
+     * Rôle : Affiche et filtre la liste des comptes utilisateurs.
+     * Paramètre : `$request` (Request) : la requête HTTP et les données envoyées ; `$userRepository` (UserRepository) : le repository utilisé pour interroger les comptes.
+     * Retour : Une réponse HTTP contenant la page ou la redirection.
+     */
     public function index(
         Request $request,
         UserRepository $userRepository
     ): Response {
+        // La recherche reste un paramètre GET : elle est lisible dans l'URL et
+        // n'entraîne aucune modification des comptes.
         $search = $request
             ->query
             ->getString('recherche');
@@ -50,6 +71,11 @@ final class AdminUserController extends AbstractController
         requirements: ['id' => '\d+'],
         methods: ['POST']
     )]
+    /**
+     * Rôle : Bannit ou réactive un compte utilisateur autorisé.
+     * Paramètre : `$request` (Request) : la requête HTTP et les données envoyées ; `$targetUser` (User) : le compte ciblé par l’administration ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance.
+     * Retour : Une réponse HTTP contenant la page ou la redirection.
+     */
     public function toggleBan(
         Request $request,
         User $targetUser,
@@ -73,6 +99,8 @@ final class AdminUserController extends AbstractController
             );
         }
 
+        // Un administrateur ne peut pas bannir un autre administrateur, ce qui
+        // évite de rendre la gestion du site inaccessible par erreur.
         if ($this->isProtectedAccount($targetUser)) {
             $this->addFlash(
                 'error',
@@ -111,6 +139,11 @@ final class AdminUserController extends AbstractController
         requirements: ['id' => '\d+'],
         methods: ['POST']
     )]
+    /**
+     * Rôle : Supprime définitivement un compte utilisateur autorisé.
+     * Paramètre : `$request` (Request) : la requête HTTP et les données envoyées ; `$targetUser` (User) : le compte ciblé par l’administration ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance.
+     * Retour : Une réponse HTTP contenant la page ou la redirection.
+     */
     public function delete(
         Request $request,
         User $targetUser,
@@ -134,6 +167,7 @@ final class AdminUserController extends AbstractController
             );
         }
 
+        // La même protection est appliquée à la suppression définitive.
         if ($this->isProtectedAccount($targetUser)) {
             $this->addFlash(
                 'error',
@@ -165,6 +199,7 @@ final class AdminUserController extends AbstractController
     private function isProtectedAccount(
         User $user
     ): bool {
+        // Le troisième argument impose une comparaison stricte des rôles.
         return in_array(
             'ROLE_ADMIN',
             $user->getRoles(),

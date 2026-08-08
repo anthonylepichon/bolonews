@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : point d'entrée AJAX du bouton « J'aime ».
+ * Rôle : ajouter ou retirer la relation utilisateur-article et renvoyer son état en JSON.
+ */
+
 namespace App\Controller;
 
 use App\Entity\ArticleLike;
@@ -15,6 +20,15 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class LikeController extends AbstractController
 {
+    // -----------------------
+    // ATTRIBUTS
+    // -----------------------
+    // Aucun attribut : les dépendances sont injectées dans les méthodes.
+
+    // -----------------------
+    // METHODES
+    // -----------------------
+
     #[Route(
         '/articles/{id}/like',
         name: 'app_like_toggle',
@@ -22,6 +36,11 @@ final class LikeController extends AbstractController
         methods: ['POST']
     )]
     #[IsGranted('ROLE_USER')]
+    /**
+     * Rôle : Ajoute ou retire un J’aime et renvoie le nouvel état en JSON.
+     * Paramètre : `$id` (int) : l’identifiant de la ressource demandée ; `$request` (Request) : la requête HTTP et les données envoyées ; `$articleRepository` (ArticleRepository) : le repository utilisé pour interroger les articles ; `$likeRepository` (ArticleLikeRepository) : le repository utilisé pour interroger les J’aime ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance.
+     * Retour : Une réponse JSON destinée au JavaScript de la page.
+     */
     public function toggle(
         int $id,
         Request $request,
@@ -57,6 +76,8 @@ final class LikeController extends AbstractController
         $user = $this->getUser();
 
         try {
+            // Une seule route réalise les deux actions : l'absence de relation
+            // crée le like, sa présence le retire de la table d'association.
             $existingLike = $likeRepository->findOneBy([
                 'user' => $user,
                 'article' => $article,
@@ -82,13 +103,15 @@ final class LikeController extends AbstractController
                 'article' => $article,
             ]);
         } catch (\Throwable) {
-            // Aucun détail technique n’est exposé dans la réponse JSON.
+            // Aucun détail technique n'est exposé dans la réponse JSON : il
+            // pourrait révéler la structure interne de l'application.
             return $this->json(
                 ['error' => 'Une erreur est survenue.'],
                 JsonResponse::HTTP_INTERNAL_SERVER_ERROR
             );
         }
 
+        // Le JavaScript met à jour l'icône et le compteur sans recharger la page.
         return $this->json([
             'liked' => $liked,
             'likeCount' => $likeCount,

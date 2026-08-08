@@ -2,6 +2,41 @@
 
 Date de l’audit : 6 août 2026
 
+## Mise à jour après corrections — 8 août 2026
+
+La passe d’implémentation Bootstrap/SCSS et de mise en conformité avec la page
+`04 - Interface utilisateur` de Figma est terminée. Les écarts suivants relevés
+dans l’audit initial ont été corrigés :
+
+- application du Design System aux pages publiques, aux formulaires, aux espaces utilisateur et administrateur ;
+- séparation des articles publiés et des brouillons dans les tableaux de bord ;
+- aperçu autorisé d’un brouillon pour son auteur et l’administrateur ;
+- bouton d’édition dans le détail et suppression administrative dans le formulaire d’article ;
+- actions de publication et de dépublication visibles selon l’état de l’article ;
+- recherche et réinitialisation des articles, avec affichage des filtres actifs ;
+- correction complète du comportement AJAX du like et de ses erreurs ;
+- aperçu JavaScript des avatars et de l’image principale d’un article ;
+- contrôle JavaScript de la confirmation des mots de passe ;
+- modales Bootstrap pour les suppressions et le bannissement ;
+- ajout et modification locale des catégories depuis leur page de gestion ;
+- menu Bootstrap responsive et messages flash refermables ;
+- option « Se souvenir de moi » configurée ;
+- validation explicite de l’adresse e-mail à l’inscription ;
+- redirection vers la connexion après la création d’un compte ;
+- affichage du message spécifique lorsqu’un compte est suspendu ;
+- formulaire de contact conservé comme vue de démonstration sans traitement, conformément à la décision du développeur.
+
+Contrôles réussis après cette passe : compilation Sass, syntaxe Twig, PHP, YAML
+et JavaScript, validation du conteneur Symfony, routes et mapping Doctrine. Les
+pages publiques ont aussi été vérifiées visuellement en desktop et en mobile,
+y compris le menu Bootstrap Collapse.
+
+Les travaux restant volontairement hors de cette passe sont les tests
+fonctionnels automatisés, qui nécessitent d’abord une base `bolonews_test`
+configurée et isolée. Les documents de conceptualisation doivent également
+être actualisés lorsque la décision d’utiliser AJAX pour la recherche des
+articles remplace définitivement l’ancienne spécification GET avec rechargement.
+
 ## Périmètre contrôlé
 
 L’audit compare l’implémentation actuelle avec les éléments de conceptualisation du projet :

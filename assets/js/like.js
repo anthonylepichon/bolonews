@@ -1,15 +1,26 @@
-document.addEventListener('DOMContentLoaded', () => {
+// Présentation : module AJAX du bouton « J'aime » d'un article.
+// Rôle : envoyer l'action à Symfony, mettre à jour l'état et le compteur, puis
+// restaurer l'interface si la requête échoue.
+// Turbo remplace le contenu de la page sans recharger tout le document.
+// DOMContentLoaded ne se produit donc qu'au premier affichage : ce WeakSet
+// permet d'initialiser chaque nouveau bouton une seule fois, y compris après
+// une navigation Turbo ou la restauration d'une page depuis son cache.
+const initializedLikeButtons = new WeakSet();
+
+const initializeLikeButton = () => {
     const likeButton = document.querySelector(
         '[data-like-button]'
     );
 
-    if (!likeButton) {
+    if (
+        !likeButton
+        || initializedLikeButtons.has(likeButton)
+    ) {
+        // Le module est globalement importé, mais ne s'active que sur un article.
         return;
     }
 
-    const likeIcon = likeButton.querySelector(
-        '[data-like-icon]'
-    );
+    initializedLikeButtons.add(likeButton);
 
     const likeLabel = likeButton.querySelector(
         '[data-like-label]'
@@ -24,17 +35,18 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
     likeButton.addEventListener('click', async () => {
-        // Ces valeurs permettent de restaurer fidèlement
-        // l'interface si la requête échoue.
+        // Ces valeurs permettent de restaurer fidèlement l'interface si la
+        // requête réseau, la sécurité ou la réponse JSON rencontre une erreur.
         const previousState = {
             pressed: likeButton.getAttribute(
                 'aria-pressed'
             ),
-            icon: likeIcon.textContent,
             label: likeLabel.textContent,
             count: likeCount.textContent,
         };
 
+        // Désactiver temporairement empêche deux clics rapides de créer des
+        // requêtes concurrentes et un compteur incohérent.
         likeButton.disabled = true;
 
         if (errorMessage) {
@@ -43,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const requestBody = JSON.stringify({
+            // Le jeton généré par Twig est revérifié dans LikeController.
             _token: likeButton.dataset.likeToken,
         });
 
@@ -85,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 typeof data.liked !== 'boolean'
                 || !Number.isInteger(data.likeCount)
             ) {
+                // La forme de la réponse est contrôlée avant de modifier le DOM.
                 userMessage =
                     'La réponse du serveur est invalide.';
 
@@ -96,22 +110,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.liked ? 'true' : 'false'
             );
 
-            likeIcon.textContent = data.liked
-                ? '♥'
-                : '♡';
-
             likeLabel.textContent = data.liked
                 ? 'Je n’aime plus'
                 : 'J’aime';
 
             likeCount.textContent = data.likeCount;
         } catch {
+            // Une erreur restaure exactement l'état antérieur au clic, puis rend
+            // un message accessible dans la zone data-like-error.
             likeButton.setAttribute(
                 'aria-pressed',
                 previousState.pressed
             );
 
-            likeIcon.textContent = previousState.icon;
             likeLabel.textContent = previousState.label;
             likeCount.textContent = previousState.count;
 
@@ -124,4 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
             likeButton.disabled = false;
         }
     });
-});
+};
+
+// L'appel direct couvre le premier chargement de la page. L'évènement
+// turbo:load relance ensuite la recherche du bouton après chaque navigation.
+initializeLikeButton();
+document.addEventListener('turbo:load', initializeLikeButton);

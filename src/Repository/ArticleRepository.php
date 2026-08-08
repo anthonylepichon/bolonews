@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : repository Doctrine consacré aux requêtes sur les articles.
+ * Rôle : centraliser notamment la recherche publique par texte et catégorie.
+ */
+
 namespace App\Repository;
 
 use App\Entity\Article;
@@ -11,6 +16,20 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ArticleRepository extends ServiceEntityRepository
 {
+    // -----------------------
+    // ATTRIBUTS
+    // -----------------------
+    // Aucun attribut déclaré : l'accès à Doctrine est hérité du repository parent.
+
+    // -----------------------
+    // METHODES
+    // -----------------------
+
+    /**
+     * Rôle : Initialise le repository pour l’entité Doctrine correspondante.
+     * Paramètre : `$registry` (ManagerRegistry) : le registre Doctrine donnant accès au gestionnaire de l’entité.
+     * Retour : Aucun : un constructeur initialise l’objet.
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Article::class);
@@ -42,6 +61,10 @@ class ArticleRepository extends ServiceEntityRepository
 //    }
 
     /**
+     * Rôle : Recherche les articles publiés correspondant au texte et à la catégorie.
+     * Paramètre : `$search` (?string) : le texte de recherche facultatif ; `$categoryId` (?int) : l’identifiant facultatif de la catégorie.
+     * Retour : Un tableau contenant les données demandées.
+     *
      * Recherche les articles publiés avec un filtre facultatif.
      *
      * @return Article[]
@@ -50,6 +73,8 @@ class ArticleRepository extends ServiceEntityRepository
         ?string $search,
         ?int $categoryId
     ): array {
+        // Le QueryBuilder construit progressivement une seule requête Doctrine.
+        // Le filtre publié est permanent car ce repository alimente le public.
         $queryBuilder = $this->createQueryBuilder('article')
             ->andWhere('article.isPublished = :published')
             ->setParameter('published', true)
@@ -58,6 +83,8 @@ class ArticleRepository extends ServiceEntityRepository
         $search = trim((string) $search);
 
         if ($search !== '') {
+            // LOWER rend la comparaison indépendante des majuscules. La valeur
+            // est liée par setParameter() et n'est jamais concaténée dans le DQL.
             $queryBuilder
                 ->andWhere(
                     'LOWER(article.title) LIKE LOWER(:search)
@@ -71,6 +98,7 @@ class ArticleRepository extends ServiceEntityRepository
         }
 
         if ($categoryId !== null) {
+            // IDENTITY lit directement la clé étrangère de la relation category.
             $queryBuilder
                 ->andWhere(
                     'IDENTITY(article.category) = :categoryId'

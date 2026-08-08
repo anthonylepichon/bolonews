@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Présentation : repository Doctrine des commentaires.
+ * Rôle : fournir les opérations de lecture liées aux commentaires persistés.
+ */
+
 namespace App\Repository;
 
 use App\Entity\Comment;
@@ -11,6 +16,20 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class CommentRepository extends ServiceEntityRepository
 {
+    // -----------------------
+    // ATTRIBUTS
+    // -----------------------
+    // Aucun attribut déclaré : l'accès à Doctrine est hérité du repository parent.
+
+    // -----------------------
+    // METHODES
+    // -----------------------
+
+    /**
+     * Rôle : Initialise le repository pour l’entité Doctrine correspondante.
+     * Paramètre : `$registry` (ManagerRegistry) : le registre Doctrine donnant accès au gestionnaire de l’entité.
+     * Retour : Aucun : un constructeur initialise l’objet.
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Comment::class);

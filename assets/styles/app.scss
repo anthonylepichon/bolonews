@@ -1,6 +1,1655 @@
-// Les variables Bootstrap pourront être surchargées ici avant son import.
+// Présentation : feuille de styles principale et point d'entrée Sass du projet.
+// Rôle : personnaliser Bootstrap avec le Design System, puis définir les composants Bolonews.
 
-// Bootstrap 5 utilise encore @import pour permettre la personnalisation de ses variables.
+// Ressource ajoutée au projet : Lato est utilisée pour le texte courant et
+// Merriweather pour les titres, conformément au Design System de la maquette.
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Merriweather:wght@700&display=swap');
+
+// -----------------------------------------------------------------------------
+// Personnalisation de Bootstrap à partir du Design System Figma.
+// Ces variables Sass portent les mêmes noms que celles du framework. Elles sont
+// déclarées AVANT l'import : Bootstrap les réutilise donc lors de sa compilation
+// au lieu de produire ses couleurs, polices, arrondis et boutons par défaut.
+// -----------------------------------------------------------------------------
+
+$font-family-sans-serif: 'Lato', Arial, sans-serif;
+$headings-font-family: 'Merriweather', Georgia, serif;
+$headings-font-weight: 700;
+
+$body-color: #000000;
+$body-bg: #ffffff;
+$primary: #eed920;
+$secondary: #7f7f7f;
+
+$border-radius: 0.625rem;
+$border-radius-sm: 0.5rem;
+$border-radius-lg: 1.125rem;
+
+$btn-font-family: $font-family-sans-serif;
+$btn-font-size: 1rem;
+$btn-padding-y: 0.5625rem;
+$btn-padding-x: 2rem;
+$btn-border-radius: 0.625rem;
+
+// Import local installé avec Composer/SassBundle, sans npm ni CDN Bootstrap.
+// À partir de cette ligne, les composants et utilitaires Bootstrap sont générés.
 @import '../../vendor/twbs/bootstrap/scss/bootstrap';
 
-// Les styles propres à Bolonews seront ajoutés sous cet import.
+// -----------------------------------------------------------------------------
+// Jetons Bolonews et styles communs ajoutés APRÈS Bootstrap.
+// Ils complètent ou surchargent le framework sans modifier ses fichiers vendor.
+// -----------------------------------------------------------------------------
+
+:root {
+    // Ces propriétés personnalisées CSS centralisent les valeurs répétées dans
+    // les styles manuels et restent accessibles directement dans le navigateur.
+    --color-text-default: #000000;
+    --color-text-inverse: #ffffff;
+    --color-background-default: #ffffff;
+    --color-background-muted: #7f7f7f;
+    --color-background-accent: #eed920;
+    --color-background-accent-subtle: #f7efa7;
+    --spacing-xs: 0.5rem;
+    --spacing-lg: 2rem;
+    --size-control-standard: 2.75rem;
+}
+
+body {
+    min-width: 20rem;
+}
+
+body > main {
+    flex: 1 0 auto;
+    width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--color-text-default);
+}
+
+.btn {
+    // Ajout Bolonews à tous les boutons Bootstrap : hauteur tactile homogène de
+    // 44 px. La classe .btn-compact définie plus bas constitue l'unique exception.
+    min-height: var(--size-control-standard);
+}
+
+.btn-primary {
+    // Bootstrap expose ses états par des variables --bs-btn-*. Les redéfinir ici
+    // conserve le composant (focus, disabled, transitions) avec un texte noir.
+    --bs-btn-color: var(--color-text-default);
+    --bs-btn-hover-color: var(--color-text-default);
+    --bs-btn-active-color: var(--color-text-default);
+    --bs-btn-disabled-color: var(--color-text-default);
+}
+
+.btn-outline-primary {
+    // Même principe pour le bouton secondaire : comportement Bootstrap conservé,
+    // apparence adaptée à la hiérarchie visuelle définie dans Figma.
+    --bs-btn-color: var(--color-text-default);
+    --bs-btn-hover-color: var(--color-text-default);
+    --bs-btn-active-color: var(--color-text-default);
+}
+
+// Navigation principale -------------------------------------------------------
+
+// Le composant .navbar/.collapse vient de Bootstrap. Les sélecteurs site-*
+// ci-dessous ajoutent la bordure jaune, la typographie et l'indicateur actif.
+
+.site-header {
+    position: relative;
+    z-index: 1000;
+}
+
+.site-header .navbar {
+    min-height: 5rem;
+    padding: 0.75rem 4rem;
+    background-color: var(--color-background-default);
+    border-bottom: 0.125rem solid var(--color-background-accent);
+    box-shadow: 0 0.25rem 0.4375rem rgb(0 0 0 / 6%);
+}
+
+.site-header .navbar-brand,
+.site-header .nav-link {
+    color: var(--color-text-default);
+    font-family: $headings-font-family;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.site-header .navbar-brand:hover,
+.site-header .navbar-brand:focus,
+.site-header .nav-link:hover,
+.site-header .nav-link:focus {
+    color: var(--color-text-default);
+}
+
+.site-header .nav-link {
+    position: relative;
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+}
+
+.site-header .nav-link::after {
+    // Soulignement animé ajouté manuellement. aria-current est posé par Twig :
+    // la page active reste donc compréhensible sans changer de police.
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0.25rem;
+    left: 0.5rem;
+    height: 0.1875rem;
+    content: '';
+    background-color: var(--color-background-accent);
+    border-radius: 999px;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 150ms ease-in-out;
+}
+
+.site-header .nav-link[aria-current='page']::after,
+.site-header .nav-link:hover::after,
+.site-header .nav-link:focus-visible::after {
+    transform: scaleX(1);
+}
+
+.site-header .navbar-toggler {
+    border-color: var(--color-background-accent);
+}
+
+.site-header .navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgb(238 217 32 / 30%);
+}
+
+.account-avatar {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    object-fit: cover;
+    color: #141414;
+    font-weight: 700;
+    background-color: #dddddd;
+    border-radius: 50%;
+}
+
+// Pied de page ---------------------------------------------------------------
+
+.site-footer {
+    display: flex;
+    min-height: 7.5rem;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    color: var(--color-text-inverse);
+    text-align: center;
+    background-color: var(--color-text-default);
+}
+
+.site-footer p {
+    margin: 0;
+}
+
+// Page d'accueil -------------------------------------------------------------
+
+// La structure responsive repose sur .container, .row, .col-* et .card de
+// Bootstrap ; les classes BEM home-*/featured-* règlent la fidélité à la maquette.
+
+.home-masthead {
+    padding: 0.25rem 1rem 1rem;
+    margin: 0 clamp(1rem, 3.75vw, 3.375rem);
+    text-align: center;
+    border-bottom: 1px solid rgb(127 127 127 / 55%);
+}
+
+.home-masthead__title {
+    margin: 0;
+    font-family: $headings-font-family;
+    font-size: clamp(3rem, 5.3vw, 4.75rem);
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.home-masthead__subtitle {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.home-content {
+    // 978 px avec les gouttières Bootstrap, soit 954 px de contenu utile.
+    // max-width limite les longues lignes tout en gardant .container responsive.
+    max-width: 61.125rem;
+    padding-top: 1.75rem;
+    padding-bottom: 3rem;
+}
+
+.home-section-title {
+    margin-bottom: 2rem;
+    font-size: 1.125rem;
+    line-height: 1.25;
+}
+
+.featured-article {
+    height: 20.125rem;
+    overflow: hidden;
+    border: 1px solid var(--color-background-muted);
+    border-radius: 1.125rem;
+    box-shadow: 0 0.625rem 1.75rem rgb(0 0 0 / 9%);
+}
+
+.featured-article__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 20rem;
+    object-fit: cover;
+}
+
+.featured-article__body {
+    display: flex;
+    min-height: 20rem;
+    flex-direction: column;
+    padding: 0.5rem 1rem;
+}
+
+.article-category {
+    align-self: flex-start;
+    padding: 0.125rem 0.875rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-default);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.1875;
+    background-color: var(--color-background-accent-subtle);
+    border-radius: 999px;
+}
+
+.featured-article__title {
+    margin: 0;
+    font-size: 1.125rem;
+    line-height: 1.3;
+}
+
+.featured-article__title a {
+    color: var(--color-text-default);
+    text-decoration: none;
+}
+
+.featured-article__title a:hover,
+.featured-article__title a:focus-visible {
+    text-decoration: underline;
+    text-decoration-color: var(--color-background-accent);
+    text-decoration-thickness: 0.1875rem;
+    text-underline-offset: 0.25rem;
+}
+
+.featured-article__summary {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    margin: 1rem 0;
+    line-height: 1.25;
+}
+
+.featured-article__author {
+    display: flex;
+    align-items: center;
+    gap: 0.8125rem;
+    margin-bottom: 0.5rem;
+}
+
+.article-avatar {
+    display: inline-flex;
+    width: 3rem;
+    height: 3rem;
+    flex: 0 0 3rem;
+    align-items: center;
+    justify-content: center;
+    object-fit: cover;
+    color: #141414;
+    font-size: 0.875rem;
+    font-weight: 700;
+    background-color: #dddddd;
+    border-radius: 50%;
+}
+
+.featured-article__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.featured-article__date {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+
+.article-stats,
+.article-stats span {
+    display: flex;
+    align-items: center;
+}
+
+.article-stats {
+    flex: 0 0 auto;
+    gap: 1.5rem;
+    font-size: 0.875rem;
+}
+
+.article-stats span {
+    gap: 0.375rem;
+}
+
+.article-stat-icon {
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.home-latest__title {
+    margin-bottom: 1rem;
+    font-size: 1.625rem;
+    line-height: 1.25;
+}
+
+.home-latest__grid {
+    --bs-gutter-x: 2.1875rem;
+    --bs-gutter-y: 1.25rem;
+}
+
+.latest-article {
+    display: flex;
+    height: 15.5rem;
+    flex-direction: row;
+    overflow: hidden;
+    border: 1px solid var(--color-background-muted);
+    border-radius: 1.125rem;
+    box-shadow: 0 0.625rem 1.75rem rgb(0 0 0 / 9%);
+}
+
+.latest-article__image {
+    display: block;
+    width: 11rem;
+    height: 100%;
+    flex: 0 0 11rem;
+    object-fit: cover;
+    border-radius: 0.875rem;
+}
+
+.latest-article__body {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    padding: 0.5rem 0.875rem 0.6875rem;
+}
+
+.latest-article .article-category {
+    padding: 0.1875rem 0.4375rem;
+    margin-bottom: 0.4375rem;
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+.latest-article__title {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0;
+    font-size: 1.125rem;
+    line-height: 1.08;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.latest-article__title a {
+    color: var(--color-text-default);
+    text-decoration: none;
+}
+
+.latest-article__title a:hover,
+.latest-article__title a:focus-visible {
+    text-decoration: underline;
+    text-decoration-color: var(--color-background-accent);
+    text-decoration-thickness: 0.1875rem;
+    text-underline-offset: 0.25rem;
+}
+
+.latest-article__publication {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.1875rem;
+    color: var(--color-background-muted);
+    line-height: 1.1;
+}
+
+.latest-article__publication span {
+    font-size: 0.75rem;
+    letter-spacing: 0.0225rem;
+}
+
+.latest-article__publication time {
+    flex: 0 0 auto;
+    font-size: 0.625rem;
+    text-align: right;
+}
+
+.latest-article__summary {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 1.1875rem 0 0;
+    font-size: 1rem;
+    line-height: 1.18;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+.latest-article__read-more {
+    display: inline-flex;
+    align-self: flex-end;
+    align-items: center;
+    gap: 1rem;
+    margin-top: auto;
+    color: var(--color-text-default);
+    font-size: 0.875rem;
+    letter-spacing: 0.02625rem;
+    text-decoration: none;
+}
+
+.latest-article__read-more img {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+}
+
+.latest-article__read-more:hover,
+.latest-article__read-more:focus-visible {
+    text-decoration: underline;
+    text-decoration-color: var(--color-background-accent);
+    text-decoration-thickness: 0.1875rem;
+    text-underline-offset: 0.25rem;
+}
+
+.latest-article__stats {
+    margin-top: 1rem;
+}
+
+.home-latest__action {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+// Page des articles ----------------------------------------------------------
+
+// Ce bandeau est entièrement spécifique à Bolonews. Il complète le formulaire
+// HTML et article-search.js ; aucune classe Bootstrap ne fournit ce comportement.
+
+.article-search-panel {
+    // sticky garde recherche et filtres visibles. Son z-index reste inférieur à
+    // celui de la navigation afin que les deux éléments ne se superposent pas.
+    position: sticky;
+    z-index: 900;
+    top: 0;
+    padding: 1.5rem 1rem 1rem;
+    background-color: var(--color-background-default);
+    border-bottom: 1px solid rgb(127 127 127 / 55%);
+    box-shadow: 0 0.25rem 0.4375rem rgb(0 0 0 / 6%);
+}
+
+.article-search-form {
+    display: flex;
+    justify-content: center;
+}
+
+.article-search-control {
+    display: flex;
+    width: min(100%, 21.9375rem);
+    height: 1.8125rem;
+    align-items: center;
+    border-bottom: 1px solid var(--color-text-default);
+}
+
+.article-search-control input {
+    min-width: 0;
+    height: 100%;
+    flex: 1 1 auto;
+    padding: 0 0.25rem 0 0;
+    font-family: $headings-font-family;
+    font-size: 1.125rem;
+    font-weight: 700;
+    background: transparent;
+    border: 0;
+    outline: 0;
+}
+
+.article-search-control input::-webkit-search-cancel-button {
+    display: none;
+}
+
+.article-search-control input::placeholder {
+    color: var(--color-text-default);
+    opacity: 1;
+}
+
+.article-search-control input:focus-visible {
+    box-shadow: 0 0.1875rem 0 var(--color-background-accent);
+}
+
+.article-search-control__submit,
+.article-search-control__reset {
+    display: inline-flex;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: 0 0 1.5rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: var(--color-text-default);
+    background: transparent;
+    border: 0;
+}
+
+.article-search-control__reset {
+    margin-right: 0.5rem;
+}
+
+.article-search-control__submit img,
+.article-search-control__reset img {
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.article-search-control__submit:focus-visible,
+.article-search-control__reset:focus-visible {
+    outline: 0.1875rem solid var(--color-background-accent);
+    outline-offset: 0.125rem;
+}
+
+.article-filter-nav {
+    margin-top: 0.75rem;
+}
+
+.article-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4375rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.article-filters a {
+    display: inline-flex;
+    min-height: 2.375rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    color: var(--color-text-default);
+    font-size: 1.125rem;
+    line-height: 1;
+    text-decoration: none;
+    background-color: var(--color-background-default);
+    border: 1px solid rgb(127 127 127 / 35%);
+    border-radius: 999px;
+}
+
+.article-filters a:hover,
+.article-filters a:focus-visible {
+    border-color: var(--color-background-accent);
+}
+
+.article-filters a[aria-current='true'] {
+    background-color: var(--color-background-accent-subtle);
+    border-color: var(--color-background-accent-subtle);
+}
+
+.active-article-filters {
+    display: flex;
+    max-width: 59.625rem;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding-top: 0.75rem;
+    margin: 0 auto;
+    font-size: 0.875rem;
+}
+
+.active-article-filters[hidden] {
+    display: none;
+}
+
+.active-article-filters p,
+.active-article-filters ul {
+    margin: 0;
+}
+
+.active-article-filters ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    padding: 0;
+    list-style: none;
+}
+
+.articles-content {
+    max-width: 61.125rem;
+    padding-top: 2rem;
+    padding-bottom: 4.75rem;
+}
+
+.articles-content__title {
+    margin-bottom: 1rem;
+    font-size: 1.625rem;
+    line-height: 1.25;
+}
+
+[data-articles-results][aria-busy='true'] {
+    // Retour visuel pendant fetch(), piloté par l'attribut posé en JavaScript.
+    opacity: 0.55;
+}
+
+// Page de détail d'un article --------------------------------------------------
+
+.article-detail-content {
+    max-width: 76.5rem;
+    padding-top: 3rem;
+    padding-bottom: 2rem;
+}
+
+.article-detail {
+    padding: 0.6875rem 2.25rem 1.5rem;
+    overflow: hidden;
+    border: 1px solid var(--color-background-muted);
+    border-radius: 1.5rem;
+    box-shadow: 0 0.625rem 1.75rem rgb(0 0 0 / 9%);
+}
+
+.article-detail__category {
+    display: inline-flex;
+    padding: 0.5rem 1rem;
+    color: var(--color-text-default);
+    font-size: 1.125rem;
+    font-weight: 400;
+    line-height: 1;
+    background-color: var(--color-background-accent-subtle);
+    border-radius: 999px;
+}
+
+.article-detail__title {
+    max-width: 51.125rem;
+    margin: 0.5rem 0 0;
+    font-size: 1.625rem;
+    line-height: 1.25;
+}
+
+.article-detail__date {
+    margin: 2.5rem 0 0;
+    font-size: 0.75rem;
+}
+
+.article-detail__lead {
+    margin: 2rem 0 0;
+    font-family: $headings-font-family;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.article-detail__image {
+    display: block;
+    width: min(100%, 41.9375rem);
+    aspect-ratio: 3 / 2;
+    margin: 1.5rem auto 2rem;
+    object-fit: cover;
+    border-radius: 1rem;
+}
+
+.article-detail__body-copy {
+    line-height: 1.45;
+}
+
+.article-detail__footer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-top: 2rem;
+}
+
+.article-detail__edit-action {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 1.5rem;
+}
+
+.article-detail__author {
+    display: flex;
+    align-items: center;
+    gap: 1.1875rem;
+}
+
+.article-detail__stats {
+    align-items: center;
+}
+
+.article-like-button {
+    display: inline-flex;
+    min-width: 3rem;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.5rem;
+    color: var(--color-text-default);
+    background-color: transparent;
+    border: 0;
+    border-radius: 999px;
+}
+
+.article-like-button:hover,
+.article-like-button:focus-visible,
+.article-like-button[aria-pressed='true'] {
+    background-color: var(--color-background-accent-subtle);
+}
+
+.article-like-button:focus-visible {
+    outline: 0.1875rem solid var(--color-background-accent);
+    outline-offset: 0.125rem;
+}
+
+.article-like-error {
+    position: absolute;
+    right: 0;
+    bottom: -0.5rem;
+    margin: 0;
+    color: var(--bs-danger);
+    font-size: 0.875rem;
+    transform: translateY(100%);
+}
+
+.article-comments {
+    max-width: 76.5rem;
+    padding-top: 2.75rem;
+    padding-bottom: 6rem;
+    border-top: 1px solid rgb(127 127 127 / 55%);
+}
+
+.article-comments__title {
+    margin-bottom: 1.75rem;
+    font-size: 1.625rem;
+}
+
+.article-comments__list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.article-comment {
+    min-height: 8.5625rem;
+    padding: 1.125rem 1.75rem;
+    border: 1px solid var(--color-background-muted);
+    border-radius: 0.875rem;
+    box-shadow: 0 0.25rem 0.875rem rgb(0 0 0 / 6%);
+}
+
+.article-comment__header,
+.article-comment__author {
+    display: flex;
+    align-items: center;
+}
+
+.article-comment__header {
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.article-comment__author {
+    gap: 1rem;
+}
+
+.comment-avatar {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    align-items: center;
+    justify-content: center;
+    object-fit: cover;
+    color: #141414;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background-color: #dddddd;
+    border-radius: 50%;
+}
+
+.article-comment__header time {
+    font-size: 0.875rem;
+    text-align: right;
+}
+
+.article-comment__content {
+    margin: 1rem 0 0;
+}
+
+.article-comment-action {
+    max-width: 34.375rem;
+    margin-top: 3.5rem;
+}
+
+.article-comment-action__title {
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+}
+
+.comment-form textarea {
+    min-height: 7.5625rem;
+    resize: vertical;
+    border-color: var(--color-background-muted);
+    border-radius: 0.875rem;
+    box-shadow: 0 0.25rem 0.875rem rgb(0 0 0 / 6%);
+}
+
+.comment-form textarea:focus {
+    border-color: var(--color-background-accent);
+    box-shadow: 0 0 0 0.2rem rgb(238 217 32 / 25%);
+}
+
+@media (max-width: 991.98px) {
+    .site-header .navbar {
+        padding: 0.75rem 1rem;
+    }
+
+    .site-header .navbar-collapse {
+        padding-top: 1rem;
+    }
+
+    .site-header .nav-link::after {
+        right: auto;
+        width: 2rem;
+        transform-origin: left;
+    }
+
+    .site-account-nav {
+        padding-top: 0.75rem;
+        margin-top: 0.75rem;
+        border-top: 1px solid rgb(127 127 127 / 35%);
+    }
+
+    .featured-article__image {
+        min-height: 16rem;
+        max-height: 22rem;
+    }
+
+    .featured-article {
+        height: auto;
+    }
+
+    .featured-article__body {
+        min-height: auto;
+        padding: 1.25rem;
+    }
+
+    .featured-article__summary {
+        margin: 2rem 0;
+    }
+
+    .latest-article {
+        max-width: 38rem;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .home-latest__grid {
+        --bs-gutter-x: 0;
+    }
+
+    .article-search-panel {
+        position: static;
+    }
+
+    .article-detail {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .home-masthead {
+        padding-top: 0.75rem;
+    }
+
+    .home-masthead__title {
+        font-size: 3rem;
+    }
+
+    .home-content {
+        padding-top: 1.5rem;
+    }
+
+    .featured-article__meta {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .latest-article {
+        height: auto;
+        flex-direction: column;
+    }
+
+    .latest-article__image {
+        width: 100%;
+        height: 13rem;
+        flex-basis: 13rem;
+    }
+
+    .latest-article__body {
+        min-height: 15.5rem;
+        padding: 1rem;
+    }
+
+    .article-search-panel {
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+    }
+
+    .article-filters {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        padding-bottom: 0.25rem;
+        overflow-x: auto;
+    }
+
+    .article-filters a {
+        min-height: 2rem;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.9375rem;
+        white-space: nowrap;
+    }
+
+    .active-article-filters {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .article-detail-content {
+        padding-top: 1.5rem;
+    }
+
+    .article-detail {
+        padding: 1rem;
+        border-radius: 1.125rem;
+    }
+
+    .article-detail__category {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.9375rem;
+    }
+
+    .article-detail__title {
+        font-size: 1.5rem;
+    }
+
+    .article-detail__date,
+    .article-detail__lead {
+        margin-top: 1.5rem;
+    }
+
+    .article-detail__image {
+        min-height: 13rem;
+        margin-top: 1.5rem;
+    }
+
+    .article-detail__footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .article-detail__stats {
+        align-self: flex-end;
+    }
+
+    .article-comments {
+        padding-top: 2rem;
+        padding-bottom: 4rem;
+    }
+
+    .article-comment {
+        padding: 1rem;
+    }
+
+    .article-comment__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .article-comment__header time {
+        padding-left: 3rem;
+        text-align: left;
+    }
+}
+
+// Formulaires et cartes communes --------------------------------------------
+
+// Symfony Form génère le HTML et Bootstrap fournit form-control/form-check.
+// app-form, form-card et les sélecteurs ci-dessous harmonisent manuellement les
+// formulaires générés avec le Design System, sans modifier le thème Symfony.
+
+.form-page-content,
+.profile-edit-content,
+.article-form-content,
+.management-page-content,
+.dashboard-content {
+    padding-top: 3rem;
+    padding-bottom: 5rem;
+}
+
+.form-page-content {
+    display: flex;
+    justify-content: center;
+}
+
+.form-page-content--login {
+    min-height: 36rem;
+}
+
+.form-card,
+.management-card {
+    width: min(100%, 39.375rem);
+    padding: 2.5rem 2rem;
+    background-color: var(--color-background-default);
+    border: 1px solid var(--color-background-muted);
+    border-radius: 1.375rem;
+    box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 9%);
+}
+
+.form-card h2,
+.management-card h2,
+.dashboard-section h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.625rem;
+}
+
+.form-card__intro {
+    margin-top: -0.75rem;
+    margin-bottom: 2rem;
+    color: var(--color-background-muted);
+}
+
+.form-card__alternate {
+    margin: 2rem 0 0;
+}
+
+.form-card__alternate a {
+    color: var(--color-text-default);
+    font-weight: 700;
+    text-decoration-color: var(--color-background-accent);
+    text-decoration-thickness: 0.1875rem;
+    text-underline-offset: 0.25rem;
+}
+
+.app-form > div,
+.app-form > fieldset,
+.image-upload-field {
+    margin-bottom: 1.5rem;
+}
+
+.app-form label,
+.image-upload-field > label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.app-form input:not([type='checkbox']):not([type='radio']),
+.app-form select,
+.app-form textarea,
+.category-create-form input,
+.category-inline-form input {
+    display: block;
+    width: 100%;
+    min-height: var(--size-control-standard);
+    // Ces règles prolongent .form-control pour couvrir aussi les widgets Symfony
+    // auxquels une classe Bootstrap n'est pas explicitement passée dans Twig.
+    padding: 0.5625rem 1rem;
+    color: var(--color-text-default);
+    background-color: var(--color-background-default);
+    border: 1px solid var(--color-background-muted);
+    border-radius: 0.625rem;
+}
+
+.app-form input:focus,
+.app-form select:focus,
+.app-form textarea:focus,
+.category-create-form input:focus,
+.category-inline-form input:focus {
+    border-color: var(--color-background-accent);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgb(238 217 32 / 25%);
+}
+
+.app-form textarea {
+    resize: vertical;
+}
+
+.app-form ul {
+    padding-left: 1.25rem;
+    margin: 0.5rem 0;
+    color: var(--bs-danger);
+}
+
+.app-form .form-text {
+    margin-top: 0.5rem;
+}
+
+.app-form .form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding-left: 0;
+}
+
+.app-form .form-check-input {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 1rem;
+    margin: 0.2rem 0 0;
+}
+
+.app-form .form-check-label {
+    margin: 0;
+}
+
+.form-actions,
+.article-form-actions,
+.article-form-secondary-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.form-actions--below-card {
+    margin-top: 2rem;
+}
+
+.image-upload-control,
+.profile-avatar-editor {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.image-preview {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    object-fit: cover;
+    color: var(--color-text-default);
+    font-weight: 700;
+    background-color: #dddddd;
+    border-radius: 50%;
+}
+
+.image-preview--avatar {
+    width: 3rem;
+    height: 3rem;
+}
+
+.image-preview--profile {
+    width: 6rem;
+    height: 6rem;
+    flex-basis: 6rem;
+    font-size: 1.5rem;
+}
+
+.form-card--registration {
+    width: min(100%, 39.375rem);
+}
+
+.form-card--contact textarea {
+    min-height: 7.5rem;
+}
+
+// Modification du profil -----------------------------------------------------
+
+.profile-edit-content {
+    max-width: 48rem;
+}
+
+.form-card--profile {
+    width: 100%;
+    padding: 3rem;
+}
+
+.profile-fieldset {
+    padding: 0 0 2rem;
+    border: 0;
+    border-bottom: 1px solid rgb(127 127 127 / 35%);
+}
+
+.profile-fieldset legend {
+    margin-bottom: 1.25rem;
+    font-family: $headings-font-family;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.profile-avatar-editor__control {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+// Formulaire d'article -------------------------------------------------------
+
+// CSS Grid organise le formulaire éditorial car cette composition en deux zones
+// n'est pas une grille de page Bootstrap. Le breakpoint la replie plus bas.
+
+.article-form-content {
+    max-width: 72rem;
+}
+
+.form-card--article {
+    width: 100%;
+    padding: 2.5rem 2rem;
+}
+
+.article-editor__intro-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
+}
+
+.article-editor__intro-grid textarea {
+    min-height: 7.5rem;
+}
+
+.article-editor > div:has(textarea[name$='[content]']) textarea {
+    min-height: 20rem;
+}
+
+.article-image-preview {
+    display: flex;
+    min-height: 10rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    overflow: hidden;
+    background-color: rgb(127 127 127 / 7%);
+    border: 1px dashed var(--color-background-muted);
+    border-radius: 0.875rem;
+}
+
+.article-image-preview > img {
+    width: 100%;
+    max-height: 24rem;
+    object-fit: cover;
+}
+
+.article-image-preview__placeholder {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 0.75rem;
+    color: var(--color-background-muted);
+}
+
+.article-image-preview__placeholder img {
+    width: 2rem;
+    height: 2rem;
+}
+
+.article-form-secondary-actions {
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid rgb(127 127 127 / 35%);
+}
+
+.article-form-secondary-actions form,
+.modal-footer form {
+    margin: 0;
+}
+
+// Espaces utilisateur et administrateur -------------------------------------
+
+.dashboard-content {
+    max-width: 61.125rem;
+}
+
+.dashboard-toolbar,
+.dashboard-admin-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.dashboard-admin-nav .btn[aria-current='page'] {
+    background-color: var(--color-background-accent-subtle);
+}
+
+.dashboard-section + .dashboard-section {
+    margin-top: 3.5rem;
+}
+
+.dashboard-grid {
+    // --bs-gutter-* sont les variables CSS officielles de la grille Bootstrap :
+    // on ajuste ses gouttières sans réécrire le système .row/.col.
+    --bs-gutter-x: 2.1875rem;
+    --bs-gutter-y: 1.25rem;
+}
+
+.dashboard-article-card {
+    width: 100%;
+}
+
+.dashboard-article-card__body {
+    position: relative;
+}
+
+.dashboard-article-card__footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: auto;
+}
+
+.dashboard-article-card__footer .latest-article__stats {
+    margin-top: 0;
+}
+
+.btn-compact {
+    // Exception demandée pour « Éditer » dans les cartes : elle annule localement
+    // la hauteur standard définie sur .btn, sans affecter les autres boutons.
+    min-height: 1.75rem;
+    padding: 0.25rem 0.875rem;
+    font-size: 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.empty-state {
+    padding: 2rem;
+    margin: 0;
+    text-align: center;
+    border: 1px dashed rgb(127 127 127 / 55%);
+    border-radius: 0.875rem;
+}
+
+// Gestion des utilisateurs et des catégories --------------------------------
+
+// Les modales et table-responsive restent des composants Bootstrap. Les classes
+// management-* et category-* ajoutent la mise en page métier et l'édition en ligne.
+
+.management-page-content {
+    max-width: 75.75rem;
+}
+
+.management-page-content--categories {
+    max-width: 63.5rem;
+}
+
+.management-card {
+    width: 100%;
+    min-height: 47.5rem;
+}
+
+.management-card > p {
+    margin-bottom: 1.5rem;
+}
+
+.management-search {
+    width: min(100%, 34.375rem);
+    margin-bottom: 1.5rem;
+}
+
+.management-search__control {
+    position: relative;
+}
+
+.management-search__control .form-control {
+    height: var(--size-control-standard);
+    padding-right: 3.25rem;
+    border-color: var(--color-background-muted);
+    border-radius: 0.625rem;
+}
+
+.management-search__control button,
+.management-search__control a {
+    position: absolute;
+    top: 50%;
+    right: 0.625rem;
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    transform: translateY(-50%);
+}
+
+.management-search__control img {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.management-search__result {
+    margin-top: -0.75rem;
+}
+
+.management-table-wrapper {
+    margin-top: 1.5rem;
+}
+
+.management-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.75rem;
+}
+
+.management-table th,
+.management-table td {
+    min-width: 8.75rem;
+    padding: 0.625rem 1rem;
+    vertical-align: middle;
+}
+
+.management-table th {
+    height: 3.25rem;
+    color: var(--color-text-inverse);
+    font-family: $headings-font-family;
+    font-size: 1.125rem;
+    background-color: var(--color-text-default);
+}
+
+.management-table th:first-child {
+    border-radius: 0.625rem 0 0 0.625rem;
+}
+
+.management-table th:last-child {
+    border-radius: 0 0.625rem 0.625rem 0;
+}
+
+.management-table td {
+    height: 4rem;
+    border-top: 1px solid var(--color-background-muted);
+    border-bottom: 1px solid var(--color-background-muted);
+}
+
+.management-table td:first-child {
+    border-left: 1px solid var(--color-background-muted);
+    border-radius: 0.5rem 0 0 0.5rem;
+}
+
+.management-table td:last-child {
+    border-right: 1px solid var(--color-background-muted);
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.management-user,
+.management-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.management-actions .btn {
+    white-space: nowrap;
+}
+
+.management-back {
+    margin-top: 3rem;
+}
+
+.category-create-form {
+    display: flex;
+    width: min(100%, 42.6875rem);
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.category-create-form__field {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.category-table {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.category-table__header,
+.category-row__display,
+.category-inline-form {
+    display: grid;
+    grid-template-columns: minmax(12rem, 1.5fr) minmax(8rem, 0.85fr) minmax(19rem, 1.5fr);
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.category-table__header {
+    min-height: 3.25rem;
+    padding: 0.625rem 1rem;
+    color: var(--color-text-inverse);
+    font-family: $headings-font-family;
+    font-size: 1.125rem;
+    font-weight: 700;
+    background-color: var(--color-text-default);
+    border-radius: 0.625rem;
+}
+
+.category-row {
+    min-height: 4rem;
+    padding: 0.5625rem 1rem;
+    border: 1px solid var(--color-background-muted);
+    border-radius: 0.5rem;
+}
+
+.category-row__display[hidden],
+.category-row__edit[hidden] {
+    display: none;
+}
+
+.category-inline-form {
+    grid-template-columns: minmax(12rem, 1fr) auto auto;
+}
+
+.modal-content {
+    border: 1px solid var(--color-background-muted);
+    border-radius: 1.125rem;
+    box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 15%);
+}
+
+@media (max-width: 991.98px) {
+    // 991.98 px correspond à la limite du breakpoint Bootstrap lg : les adaptations
+    // personnalisées basculent au même moment que col-lg-* et navbar-expand-lg.
+    .article-editor__intro-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .dashboard-grid {
+        --bs-gutter-x: 0;
+    }
+
+    .management-card {
+        min-height: 0;
+    }
+
+    .category-table {
+        overflow-x: auto;
+    }
+
+    .category-table__header,
+    .category-row {
+        min-width: 50rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    // 575.98 px correspond au breakpoint Bootstrap sm. Les actions deviennent
+    // pleine largeur pour rester lisibles et faciles à toucher sur téléphone.
+    .form-page-content,
+    .profile-edit-content,
+    .article-form-content,
+    .management-page-content,
+    .dashboard-content {
+        padding-top: 1.5rem;
+        padding-bottom: 3rem;
+    }
+
+    .form-card,
+    .management-card,
+    .form-card--profile,
+    .form-card--article {
+        padding: 1.5rem 1rem;
+        border-radius: 1rem;
+    }
+
+    .image-upload-control,
+    .profile-avatar-editor {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .form-actions,
+    .article-form-actions,
+    .article-form-secondary-actions,
+    .dashboard-toolbar,
+    .dashboard-admin-nav {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .form-actions .btn,
+    .article-form-actions .btn,
+    .article-form-secondary-actions .btn,
+    .dashboard-toolbar .btn,
+    .dashboard-admin-nav .btn {
+        width: 100%;
+    }
+
+    .category-create-form {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .category-create-form .btn {
+        width: 100%;
+    }
+}

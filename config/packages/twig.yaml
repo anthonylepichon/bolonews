@@ -1,3 +1,5 @@
+# Présentation : configuration du moteur de templates Twig.
+# Rôle : identifier les fichiers de vues et renforcer leurs contrôles dans l'environnement de test.
 twig:
     file_name_pattern: '*.twig'
 

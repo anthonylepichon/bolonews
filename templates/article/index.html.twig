@@ -1,39 +1,58 @@
+{# Présentation : catalogue public des articles.
+   Rôle : afficher la recherche, les catégories, les filtres actifs et la liste actualisable en AJAX. #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Articles - Bolonews{% endblock %}
 
 {% block body %}
-    <main>
-        <header>
-            <h1>Les articles</h1>
-
-            <p>
-                Découvrez les dernières publications de Bolonews.
-            </p>
+    {# Zone : contenu principal du catalogue des articles. #}
+    <main class="articles-page">
+        {# Zone : en-tête éditorial commun aux pages publiques. #}
+        <header class="home-masthead">
+            <div class="container">
+                <h1 class="home-masthead__title">Bolonews</h1>
+                <p class="home-masthead__subtitle">
+                    L’actualité qui se déguste, à lire chaque jour.
+                </p>
+            </div>
         </header>
 
-        <section aria-labelledby="article-search-title">
-            <h2 id="article-search-title">
-                Rechercher
+        {# Zone : panneau fixe regroupant la recherche et les filtres. #}
+        <section
+            class="article-search-panel"
+            aria-labelledby="article-search-title"
+        >
+            <h2
+                class="visually-hidden"
+                id="article-search-title"
+            >
+                Rechercher et filtrer les articles
             </h2>
 
+            {# Zone : recherche textuelle déclenchée par la loupe. #}
             <form
+                class="article-search-form"
                 action="{{ path('app_article_index') }}"
                 method="get"
                 role="search"
                 data-article-search-form
             >
-                <label for="article-search">
+                {# Les attributs data-* sont des points d'accroche pour
+                   article-search.js ; le formulaire GET reste utilisable sans JS. #}
+                <label
+                    class="visually-hidden"
+                    for="article-search"
+                >
                     Rechercher un article
                 </label>
 
-                <div>
+                <div class="article-search-control">
                     <input
                         type="search"
                         id="article-search"
                         name="recherche"
                         value="{{ search }}"
-                        placeholder="Titre, chapeau ou contenu"
+                        placeholder="Rechercher"
                     >
 
                     {% if selectedCategoryId %}
@@ -44,17 +63,11 @@
                         >
                     {% endif %}
 
-                    <button
-                        type="submit"
-                        aria-label="Lancer la recherche"
-                    >
-                        <span aria-hidden="true">🔍</span>
-                    </button>
-
                     <a
+                        class="article-search-control__reset"
                         href="{{ path('app_article_index') }}"
                         data-search-reset
-                        aria-label="Réinitialiser la recherche"
+                        aria-label="Réinitialiser la recherche et les filtres"
                         {% if
                             search is empty
                             and selectedCategoryId is null
@@ -62,24 +75,44 @@
                             hidden
                         {% endif %}
                     >
-                        <span aria-hidden="true">×</span>
+                        <img
+                            src="{{ asset('images/icons/x.svg') }}"
+                            alt=""
+                            aria-hidden="true"
+                        >
                     </a>
+
+                    <button
+                        class="article-search-control__submit"
+                        type="submit"
+                        aria-label="Lancer la recherche"
+                    >
+                        <img
+                            src="{{ asset('images/icons/search.svg') }}"
+                            alt=""
+                            aria-hidden="true"
+                        >
+                    </button>
                 </div>
             </form>
 
-            <nav aria-label="Filtrer par catégorie">
-                <ul>
+            {# Zone : navigation entre les catégories d'articles. #}
+            <nav
+                class="article-filter-nav"
+                aria-label="Filtrer par catégorie"
+            >
+                <ul class="article-filters">
                     <li>
                         <a
                             href="{{ path(
                                 'app_article_index',
                                 search is not empty
-                                    ? {
-                                        recherche: search
-                                    }
+                                    ? {recherche: search}
                                     : {}
                             ) }}"
                             data-article-filter-link
+                            {# L'identifiant vide représente « Toutes » dans le
+                               module JS et supprime le paramètre categorie. #}
                             data-category-id=""
                             data-category-label="Toutes"
                             {% if selectedCategoryId is null %}
@@ -100,9 +133,7 @@
                                             recherche: search,
                                             categorie: category.id
                                         }
-                                        : {
-                                            categorie: category.id
-                                        }
+                                        : {categorie: category.id}
                                 ) }}"
                                 data-article-filter-link
                                 data-category-id="{{ category.id }}"
@@ -118,7 +149,9 @@
                 </ul>
             </nav>
 
+            {# Zone : récapitulatif des critères actuellement appliqués. #}
             <div
+                class="active-article-filters"
                 data-active-filters
                 {% if
                     search is empty
@@ -127,25 +160,19 @@
                     hidden
                 {% endif %}
             >
+                {# Ce résumé est rendu côté serveur au chargement, puis reconstruit
+                   côté client après chaque recherche AJAX. #}
                 <p>Filtres actifs :</p>
 
                 <ul data-active-filter-list>
                     {% if search is not empty %}
-                        <li>
-                            Recherche : « {{ search }} »
-                        </li>
+                        <li>Recherche : « {{ search }} »</li>
                     {% endif %}
 
                     {% if selectedCategoryId %}
                         {% for category in categories %}
-                            {% if
-                                category.id
-                                == selectedCategoryId
-                            %}
-                                <li>
-                                    Catégorie :
-                                    {{ category.label }}
-                                </li>
+                            {% if category.id == selectedCategoryId %}
+                                <li>Catégorie : {{ category.label }}</li>
                             {% endif %}
                         {% endfor %}
                     {% endif %}
@@ -153,20 +180,32 @@
             </div>
         </section>
 
-        <section aria-labelledby="articles-title">
-            <h2 id="articles-title">
-                Toutes les publications
+        {# Zone : titre et résultats du catalogue, remplaçables par AJAX. #}
+        <section
+            class="container articles-content"
+            aria-labelledby="articles-title"
+        >
+            <h2
+                class="articles-content__title"
+                id="articles-title"
+                data-articles-title
+            >
+                {% if search is not empty or selectedCategoryId %}
+                    Résultats de recherche
+                {% else %}
+                    Tous les articles
+                {% endif %}
             </h2>
 
             <div
                 data-articles-results
                 aria-live="polite"
             >
+                {# La même partial est utilisée ici et par la réponse AJAX : cela
+                   évite de maintenir deux versions HTML de la liste. #}
                 {{ include(
                     'article/_list.html.twig',
-                    {
-                        articles: articles
-                    }
+                    {articles: articles}
                 ) }}
             </div>
         </section>

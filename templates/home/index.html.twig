@@ -1,107 +1,302 @@
+{# Présentation : page d'accueil publique de Bolonews.
+   Rôle : mettre en avant le dernier article et présenter les publications récentes. #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Accueil - Bolonews{% endblock %}
 
 {% block body %}
-    <main>
-        <header>
-            <h1>Bolonews</h1>
-            <p>L’actualité qui se déguste, à lire chaque jour.</p>
+    {# Zone : contenu principal de la page d'accueil. #}
+    <main class="home-page">
+        {# Zone : en-tête éditorial avec le nom du site et sa signature. #}
+        <header class="home-masthead">
+            <div class="container">
+                <h1 class="home-masthead__title">Bolonews</h1>
+                <p class="home-masthead__subtitle">
+                    L’actualité qui se déguste, à lire chaque jour.
+                </p>
+            </div>
         </header>
 
-        {% if articles is not empty %}
-            {% set featuredArticle = articles|first %}
-            {% set latestArticles = articles|slice(1) %}
+        {# Zone : sélection des publications affichées sur l'accueil. #}
+        <div class="container home-content">
+            {% if articles is not empty %}
+                {% set featuredArticle = articles|first %}
+                {% set latestArticles = articles|slice(1) %}
 
-            <section>
-                <h2>À la une</h2>
-
-                <article>
-                    <img
-                        src="{{ asset('images/articles/' ~ featuredArticle.imageFilename) }}"
-                        alt="Illustration de l’article {{ featuredArticle.title }}"
+                {# Zone : article principal mis à la une. #}
+                <section
+                    class="home-featured"
+                    aria-labelledby="featured-title"
+                >
+                    <h2
+                        class="home-section-title"
+                        id="featured-title"
                     >
+                        À la une
+                    </h2>
 
-                    <p>{{ featuredArticle.category.label }}</p>
-                    <h3>
-                        <a href="{{ path('app_article_show', {id: featuredArticle.id}) }}">
-                            {{ featuredArticle.title }}
-                        </a>
-                    </h3>
-                    <p>{{ featuredArticle.chapeau }}</p>
+                    {# card, row, col-lg-* et g-0 viennent de Bootstrap. Les classes
+                       featured-article__* ajoutent l'identité graphique Bolonews. #}
+                    <article class="card featured-article">
+                        <div class="row g-0 h-100">
+                            <div class="col-lg-6">
+                                <img
+                                    class="featured-article__image"
+                                    src="{{ asset(
+                                        'images/articles/'
+                                        ~ featuredArticle.imageFilename
+                                    ) }}"
+                                    alt="Illustration de l’article {{ featuredArticle.title }}"
+                                >
+                            </div>
 
-                    <p>
-                        {{ featuredArticle.author
-                            ? featuredArticle.author.pseudo
-                            : 'Auteur supprimé'
-                        }}
-                    </p>
+                            <div class="col-lg-6">
+                                <div class="card-body featured-article__body">
+                                    <span class="badge article-category">
+                                        {{ featuredArticle.category.label }}
+                                    </span>
 
-                    <p>
-                        Publié le
-                        {{ featuredArticle.createdAt|date('d/m/Y à H:i') }}
-                    </p>
+                                    <h3 class="featured-article__title">
+                                        {# stretched-link rend toute la carte cliquable tout
+                                           en conservant un lien sémantique sur le titre. #}
+                                        <a
+                                            class="stretched-link"
+                                            href="{{ path(
+                                                'app_article_show',
+                                                {id: featuredArticle.id}
+                                            ) }}"
+                                        >
+                                            {{ featuredArticle.title }}
+                                        </a>
+                                    </h3>
 
-                    <p>
-                        {{ featuredArticle.comments|length }} commentaire(s) -
-                        {{ featuredArticle.likes|length }} J’aime
-                    </p>
+                                    <p class="featured-article__summary">
+                                        {{ featuredArticle.chapeau }}
+                                    </p>
 
-                    <a href="{{ path('app_article_show', {
-                        id: featuredArticle.id
-                    }) }}">
-                        Lire l’article
-                    </a>
-                </article>
-            </section>
+                                    <div class="featured-article__author">
+                                        {% if
+                                            featuredArticle.author
+                                            and featuredArticle.author.avatarFilename
+                                        %}
+                                            <img
+                                                class="article-avatar"
+                                                src="{{ asset(
+                                                    'images/avatars/'
+                                                    ~ featuredArticle.author.avatarFilename
+                                                ) }}"
+                                                alt="Avatar de {{ featuredArticle.author.pseudo }}"
+                                            >
+                                        {% else %}
+                                            <span
+                                                class="article-avatar"
+                                                aria-hidden="true"
+                                            >
+                                                {{ featuredArticle.author
+                                                    ? featuredArticle.author.pseudo|slice(0, 2)|upper
+                                                    : '?'
+                                                }}
+                                            </span>
+                                        {% endif %}
 
-            <section>
-                <h2>Dernières parutions</h2>
+                                        <span>
+                                            {{ featuredArticle.author
+                                                ? featuredArticle.author.pseudo
+                                                : 'Auteur supprimé'
+                                            }}
+                                        </span>
+                                    </div>
 
-                {% for article in latestArticles %}
-                    <article>
-                        <img
-                            src="{{ asset('images/articles/' ~ article.imageFilename) }}"
-                            alt="Illustration de l’article {{ article.title }}"
-                        >
+                                    <div class="featured-article__meta">
+                                        <p class="featured-article__date">
+                                            <time
+                                                datetime="{{ featuredArticle.createdAt|date('c') }}"
+                                            >
+                                                Publié le
+                                                {{ featuredArticle.createdAt|date('d/m/Y à H:i') }}
+                                            </time>
+                                        </p>
 
-                        <p>{{ article.category.label }}</p>
-                        <h3>
-                            <a href="{{ path('app_article_show', {id: article.id}) }}">
-                                {{ article.title }}
-                            </a>
-                        </h3>
-                        <p>{{ article.chapeau }}</p>
+                                        <div
+                                            class="article-stats"
+                                            aria-label="Statistiques de l’article"
+                                        >
+                                            <span
+                                                aria-label="{{ featuredArticle.comments|length }} commentaire(s)"
+                                            >
+                                                <img
+                                                    class="article-stat-icon"
+                                                    src="{{ asset(
+                                                        'images/icons/message-circle.svg'
+                                                    ) }}"
+                                                    alt=""
+                                                    aria-hidden="true"
+                                                >
+                                                {{ featuredArticle.comments|length }}
+                                            </span>
 
-                        <p>
-                            {{ article.author
-                                ? article.author.pseudo
-                                : 'Auteur supprimé'
-                            }}
-                        </p>
-
-                        <p>
-                            Publié le {{ article.createdAt|date('d/m/Y à H:i') }}
-                        </p>
-
-                        <p>
-                            {{ article.comments|length }} commentaire(s) -
-                            {{ article.likes|length }} J’aime
-                        </p>
-                        <a href="{{ path('app_article_show', {id: article.id}) }}">
-                            Lire la suite
-                        </a>
+                                            <span
+                                                aria-label="{{ featuredArticle.likes|length }} J’aime"
+                                            >
+                                                <img
+                                                    class="article-stat-icon"
+                                                    src="{{ asset(
+                                                        'images/icons/heart.svg'
+                                                    ) }}"
+                                                    alt=""
+                                                    aria-hidden="true"
+                                                >
+                                                {{ featuredArticle.likes|length }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </article>
-                {% else %}
-                    <p>Aucune autre publication pour le moment.</p>
-                {% endfor %}
+                </section>
 
-                <a href="{{ path('app_article_index') }}">
-                    Voir tous les articles
-                </a>
-            </section>
-        {% else %}
-            <p>Aucun article publié pour le moment.</p>
-        {% endif %}
+                {# Zone : grille des dernières parutions. #}
+                <section
+                    class="home-latest mt-5"
+                    aria-labelledby="latest-title"
+                >
+                    <h2
+                        class="home-latest__title"
+                        id="latest-title"
+                    >
+                        Dernières parutions
+                    </h2>
+
+                    {# La grille Bootstrap empile les cartes sur mobile et affiche
+                       deux colonnes à partir du point de rupture lg. #}
+                    <div class="row home-latest__grid">
+                        {% for article in latestArticles %}
+                            <div class="col-12 col-lg-6">
+                                <article class="card latest-article">
+                                    <img
+                                        class="latest-article__image"
+                                        src="{{ asset(
+                                            'images/articles/'
+                                            ~ article.imageFilename
+                                        ) }}"
+                                        alt="Illustration de l’article {{ article.title }}"
+                                    >
+
+                                    <div class="card-body latest-article__body">
+                                        <span class="badge article-category">
+                                            {{ article.category.label }}
+                                        </span>
+
+                                        <h3 class="latest-article__title">
+                                            <a href="{{ path(
+                                                'app_article_show',
+                                                {id: article.id}
+                                            ) }}">
+                                                {{ article.title }}
+                                            </a>
+                                        </h3>
+
+                                        <div class="latest-article__publication">
+                                            <span>
+                                                {{ article.author
+                                                    ? article.author.pseudo
+                                                    : 'Auteur supprimé'
+                                                }}
+                                            </span>
+
+                                            <time
+                                                datetime="{{ article.createdAt|date('c') }}"
+                                            >
+                                                Publié le
+                                                {{ article.createdAt|date('d/m/Y à H:i') }}
+                                            </time>
+                                        </div>
+
+                                        <p class="latest-article__summary">
+                                            {{ article.chapeau }}
+                                        </p>
+
+                                        <a
+                                            class="latest-article__read-more"
+                                            href="{{ path(
+                                                'app_article_show',
+                                                {id: article.id}
+                                            ) }}"
+                                        >
+                                            <span>Lire la suite</span>
+                                            <img
+                                                src="{{ asset(
+                                                    'images/icons/arrow-right.svg'
+                                                ) }}"
+                                                alt=""
+                                                aria-hidden="true"
+                                            >
+                                        </a>
+
+                                        <div
+                                            class="article-stats latest-article__stats"
+                                            aria-label="Statistiques de l’article"
+                                        >
+                                            <span
+                                                aria-label="{{ article.comments|length }} commentaire(s)"
+                                            >
+                                                <img
+                                                    class="article-stat-icon"
+                                                    src="{{ asset(
+                                                        'images/icons/message-circle.svg'
+                                                    ) }}"
+                                                    alt=""
+                                                    aria-hidden="true"
+                                                >
+                                                {{ article.comments|length }}
+                                            </span>
+
+                                            <span
+                                                aria-label="{{ article.likes|length }} J’aime"
+                                            >
+                                                <img
+                                                    class="article-stat-icon"
+                                                    src="{{ asset(
+                                                        'images/icons/heart.svg'
+                                                    ) }}"
+                                                    alt=""
+                                                    aria-hidden="true"
+                                                >
+                                                {{ article.likes|length }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        {% else %}
+                            <div class="col-12">
+                                {# Variante Bootstrap utilisée pour un retour informatif. #}
+                                <p class="alert alert-info mb-0">
+                                    Aucune autre publication pour le moment.
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {# Zone : action permettant d'accéder au catalogue complet. #}
+                    <div class="home-latest__action">
+                        {# btn/btn-outline-primary fournissent la base Bootstrap ;
+                           les couleurs et la hauteur sont surchargées dans app.scss. #}
+                        <a
+                            class="btn btn-outline-primary"
+                            href="{{ path('app_article_index') }}"
+                        >
+                            Voir tous les articles
+                        </a>
+                    </div>
+                </section>
+            {% else %}
+                {# Zone : état vide lorsque la base ne contient aucune publication. #}
+                <div class="alert alert-info" role="status">
+                    Aucun article publié pour le moment.
+                </div>
+            {% endif %}
+        </div>
     </main>
 {% endblock %}

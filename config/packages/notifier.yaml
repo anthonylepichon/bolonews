@@ -1,3 +1,5 @@
+# Présentation : configuration du composant Notifier.
+# Rôle : préparer les canaux de notification disponibles pour l'application.
 framework:
     notifier:
         chatter_transports:
