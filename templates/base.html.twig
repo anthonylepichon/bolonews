@@ -174,12 +174,26 @@
                                 </li>
 
                                 <li class="nav-item">
-                                    <a
-                                        class="nav-link"
-                                        href="{{ path('app_logout') }}"
+                                    {# Zone : la déconnexion utilise POST et un jeton
+                                       CSRF. Turbo est désactivé afin qu'aucun
+                                       préchargement ne déclenche cette action. #}
+                                    <form
+                                        action="{{ path('app_logout') }}"
+                                        method="post"
+                                        data-turbo="false"
                                     >
-                                        Me déconnecter
-                                    </a>
+                                        <input
+                                            type="hidden"
+                                            name="_csrf_token"
+                                            value="{{ csrf_token('logout') }}"
+                                        >
+                                        <button
+                                            class="nav-link border-0 bg-transparent"
+                                            type="submit"
+                                        >
+                                            Me déconnecter
+                                        </button>
+                                    </form>
                                 </li>
                             {% else %}
                                 <li class="nav-item">

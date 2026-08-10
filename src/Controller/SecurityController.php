@@ -43,9 +43,9 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/logout', name: 'app_logout', methods: ['GET'])]
+    #[Route(path: '/logout', name: 'app_logout', methods: ['POST'])]
     /**
-     * Rôle : Déclare la route interceptée par le firewall pour fermer la session.
+     * Rôle : Déclare la route POST interceptée par le firewall pour fermer la session.
      * Paramètre : Aucun.
      * Retour : Aucun (`void`).
      */
