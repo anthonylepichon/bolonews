@@ -10,6 +10,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\ProfileFormType;
 use App\Repository\ArticleRepository;
+use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -20,7 +21,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[IsGranted('ROLE_USER')]
 final class ProfileController extends AbstractController
@@ -67,14 +67,14 @@ final class ProfileController extends AbstractController
     )]
     /**
      * Rôle : Affiche et traite la modification des informations du profil.
-     * Paramètre : `$request` (Request) : la requête HTTP et les données envoyées ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance ; `$passwordHasher` (UserPasswordHasherInterface) : le service Symfony de hachage des mots de passe ; `$slugger` (SluggerInterface) : le service qui sécurise les noms de fichiers.
+     * Paramètre : `$request` (Request) : la requête HTTP et les données envoyées ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance ; `$passwordHasher` (UserPasswordHasherInterface) : le service Symfony de hachage des mots de passe ; `$imageUploader` (ImageUploader) : le service générique qui enregistre les images.
      * Retour : Une réponse HTTP contenant la page ou la redirection.
      */
     public function edit(
         Request $request,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher,
-        SluggerInterface $slugger
+        ImageUploader $imageUploader
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
@@ -93,28 +93,12 @@ final class ProfileController extends AbstractController
             $avatarFile = $form->get('avatar')->getData();
 
             if ($avatarFile !== null) {
-                $originalFilename = pathinfo(
-                    $avatarFile->getClientOriginalName(),
-                    PATHINFO_FILENAME
-                );
-
-                $safeFilename = $slugger
-                    ->slug($originalFilename)
-                    ->lower();
-
-                $avatarFilename = sprintf(
-                    '%s-%s.%s',
-                    $safeFilename,
-                    uniqid(),
-                    $avatarFile->guessExtension()
-                );
-
                 try {
-                    $avatarFile->move(
+                    $avatarFilename = $imageUploader->upload(
+                        $avatarFile,
                         (string) $this->getParameter(
                             'avatars_directory'
-                        ),
-                        $avatarFilename
+                        )
                     );
                 } catch (FileException) {
                     $form->get('avatar')->addError(

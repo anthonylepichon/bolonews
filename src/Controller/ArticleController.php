@@ -14,6 +14,7 @@ use App\Form\ArticleFormType;
 use App\Form\CommentFormType;
 use App\Repository\ArticleLikeRepository;
 use App\Repository\ArticleRepository;
+use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -23,7 +24,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\String\Slugger\SluggerInterface;
 use App\Repository\CategoryRepository;
 
 final class ArticleController extends AbstractController
@@ -109,13 +109,13 @@ final class ArticleController extends AbstractController
     #[IsGranted('ROLE_USER')]
     /**
      * Rôle : Affiche et traite la création d’un article ou d’un brouillon.
-     * Paramètre : `$request` (Request) : la requête HTTP et les données envoyées ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance ; `$slugger` (SluggerInterface) : le service qui sécurise les noms de fichiers.
+     * Paramètre : `$request` (Request) : la requête HTTP et les données envoyées ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance ; `$imageUploader` (ImageUploader) : le service générique qui enregistre les images.
      * Retour : Une réponse HTTP contenant la page ou la redirection.
      */
     public function new(
         Request $request,
         EntityManagerInterface $entityManager,
-        SluggerInterface $slugger
+        ImageUploader $imageUploader
     ): Response {
         $article = new Article();
 
@@ -149,9 +149,11 @@ final class ArticleController extends AbstractController
             }
 
             try {
-                $imageFilename = $this->uploadArticleImage(
+                $imageFilename = $imageUploader->upload(
                     $imageFile,
-                    $slugger
+                    (string) $this->getParameter(
+                        'articles_directory'
+                    )
                 );
             } catch (FileException) {
                 $form->get('image')->addError(
@@ -217,7 +219,7 @@ final class ArticleController extends AbstractController
     #[IsGranted('ROLE_USER')]
     /**
      * Rôle : Affiche et traite la modification et l’état de publication d’un article.
-     * Paramètre : `$id` (int) : l’identifiant de la ressource demandée ; `$request` (Request) : la requête HTTP et les données envoyées ; `$articleRepository` (ArticleRepository) : le repository utilisé pour interroger les articles ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance ; `$slugger` (SluggerInterface) : le service qui sécurise les noms de fichiers.
+     * Paramètre : `$id` (int) : l’identifiant de la ressource demandée ; `$request` (Request) : la requête HTTP et les données envoyées ; `$articleRepository` (ArticleRepository) : le repository utilisé pour interroger les articles ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance ; `$imageUploader` (ImageUploader) : le service générique qui enregistre les images.
      * Retour : Une réponse HTTP contenant la page ou la redirection.
      */
     public function edit(
@@ -225,7 +227,7 @@ final class ArticleController extends AbstractController
         Request $request,
         ArticleRepository $articleRepository,
         EntityManagerInterface $entityManager,
-        SluggerInterface $slugger
+        ImageUploader $imageUploader
     ): Response {
         $article = $articleRepository->find($id);
 
@@ -271,11 +273,12 @@ final class ArticleController extends AbstractController
                 // Le nom enregistré n'est remplacé que si un nouveau fichier a
                 // réellement été choisi par l'utilisateur.
                 try {
-                    $imageFilename =
-                        $this->uploadArticleImage(
-                            $imageFile,
-                            $slugger
-                        );
+                    $imageFilename = $imageUploader->upload(
+                        $imageFile,
+                        (string) $this->getParameter(
+                            'articles_directory'
+                        )
+                    );
                 } catch (FileException) {
                     $form->get('image')->addError(
                         new FormError(
@@ -473,35 +476,4 @@ final class ArticleController extends AbstractController
         );
     }
 
-    private function uploadArticleImage(
-        UploadedFile $imageFile,
-        SluggerInterface $slugger
-    ): string {
-        // Le nom fourni par le navigateur est nettoyé, puis rendu unique pour
-        // éviter les caractères dangereux et l'écrasement d'une image existante.
-        $originalFilename = pathinfo(
-            $imageFile->getClientOriginalName(),
-            PATHINFO_FILENAME
-        );
-
-        $safeFilename = $slugger
-            ->slug($originalFilename)
-            ->lower();
-
-        $imageFilename = sprintf(
-            '%s-%s.%s',
-            $safeFilename,
-            uniqid(),
-            $imageFile->guessExtension()
-        );
-
-        $imageFile->move(
-            (string) $this->getParameter(
-                'articles_directory'
-            ),
-            $imageFilename
-        );
-
-        return $imageFilename;
-    }
 }
