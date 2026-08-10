@@ -1,5 +1,5 @@
 {# Présentation : page de connexion à l'application.
-   Rôle : fournir au firewall Symfony les identifiants, le souvenir de session et le jeton CSRF. #}
+   Rôle : fournir au firewall Symfony les identifiants et le jeton CSRF. #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Connexion - Bolonews{% endblock %}
@@ -77,13 +77,6 @@
                                 placeholder="Votre mot de passe"
                                 required
                             >
-                        </div>
-
-                        <div class="form-check mb-4">
-                            {# form-check est le composant Bootstrap pour aligner
-                               correctement la case et son libellé. #}
-                            <input class="form-check-input" type="checkbox" id="remember-me" name="_remember_me">
-                            <label class="form-check-label" for="remember-me">Se souvenir de moi</label>
                         </div>
 
                         {# Nom de champ attendu par form_login avec enable_csrf. #}

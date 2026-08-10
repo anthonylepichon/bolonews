@@ -34,13 +34,6 @@ security:
                 target: app_home
                 # where to redirect after logout
                 # target: app_any_route
-            remember_me:
-                # Le cookie reste facultatif : il n'est créé que si la case
-                # _remember_me du formulaire de connexion est cochée.
-                secret: '%kernel.secret%'
-                lifetime: 604800
-                path: /
-
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall
 

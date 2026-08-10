@@ -404,6 +404,7 @@ final class ArticleController extends AbstractController
                     ),
                     'method' => 'POST',
                 ]
+                //Inutile car render le fait tout seul  A REVOIR (Erreur IA)
             )->createView();
         }
 
