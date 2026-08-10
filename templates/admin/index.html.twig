@@ -1,69 +1,70 @@
-{# Présentation : tableau de bord des articles pour l'administrateur.
-   Rôle : afficher publications et brouillons et donner accès aux différentes gestions. #}
+{# Présentation : tableau de bord personnel de l’administrateur.
+   Rôle : afficher ses publications et ses brouillons, puis donner accès aux outils de gestion globale. #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Espace administrateur - Bolonews{% endblock %}
+{% block title %}Espace administrateur - Bolonews
+{% endblock %}
 
 {% block body %}
-    {% set publishedArticles = articles|filter(article => article.isPublished) %}
-    {% set draftArticles = articles|filter(article => not article.isPublished) %}
-    {# L'administration reçoit tous les articles du contrôleur, puis les sépare
-       selon leur état pour rendre deux sections clairement identifiables. #}
+	{% set publishedArticles = articles|filter(article => article.isPublished) %}
+	{% set draftArticles = articles|filter(article => not article.isPublished) %}
+	{# Le contrôleur fournit uniquement les articles de l’administrateur connecté.
+	       Twig les sépare ensuite selon leur état de publication. #}
 
-    {# Zone : contenu principal du tableau de bord administrateur. #}
-    <main>
-        {# Zone : en-tête présentant les outils de pilotage. #}
-        <header class="home-masthead">
-            <h1 class="home-masthead__title">Bolonews</h1>
-            <p class="home-masthead__subtitle">Pilotez les publications et les accès de Bolonews.</p>
-        </header>
+	{# Zone : contenu principal du tableau de bord administrateur. #}
+		<main>
+		{# Zone : en-tête présentant les outils de pilotage. #}
+			<header class="home-masthead"> <h1 class="home-masthead__title">Bolonews</h1>
+			<p class="home-masthead__subtitle">Pilotez vos publications et les accès de Bolonews.</p>
+		</header>
 
-        {# Zone : navigation et listes de modération. #}
-        <div class="container dashboard-content">
-            {# Les boutons utilisent la base Bootstrap. aria-current signale
-               aussi la rubrique active aux technologies d'assistance. #}
-            {# Zone : navigation entre les rubriques d'administration. #}
-            <nav class="dashboard-admin-nav" aria-label="Gestion de l’administration">
-                <a class="btn btn-outline-primary" aria-current="page" href="{{ path('app_admin') }}">Articles</a>
-                <a class="btn btn-outline-primary" href="{{ path('app_admin_category_index') }}">Catégories</a>
-                <a class="btn btn-outline-primary" href="{{ path('app_admin_user_index') }}">Utilisateurs</a>
-                <a class="btn btn-outline-primary" href="{{ path('app_profile_edit') }}">Mon profil</a>
-            </nav>
+		{# Zone : navigation et listes des articles personnels. #}
+		<div
+			class="container dashboard-content">
+			{# Les boutons utilisent la base Bootstrap. aria-current signale
+			               aussi la rubrique active aux technologies d’assistance. #}
+			<nav class="dashboard-admin-nav" aria-label="Gestion de l’administration">
+				<a class="btn btn-outline-primary" aria-current="page" href="{{ path('app_admin') }}">Mes articles</a>
+				<a class="btn btn-outline-primary" href="{{ path('app_admin_article_index') }}">Tous les articles</a>
+				<a class="btn btn-outline-primary" href="{{ path('app_admin_category_index') }}">Catégories</a>
+				<a class="btn btn-outline-primary" href="{{ path('app_admin_user_index') }}">Utilisateurs</a>
+				<a class="btn btn-outline-primary" href="{{ path('app_profile_edit') }}">Mon profil</a>
+			</nav>
 
-            {# Zone : action principale de création d'un article. #}
-            <div class="dashboard-toolbar">
-                <a class="btn btn-primary" href="{{ path('app_article_new') }}">Créer un article</a>
-            </div>
+			{# Zone : action principale de création d’un article. #}
+			<div class="dashboard-toolbar">
+				<a class="btn btn-primary" href="{{ path('app_article_new') }}">Créer un article</a>
+			</div>
 
-            {# Zone : publications accessibles au public et modérables. #}
-            <section class="dashboard-section" aria-labelledby="admin-published-title">
-                <h2 id="admin-published-title">Articles publiés</h2>
-                {# Grille Bootstrap : col-12 empile sur mobile et col-lg-6
-                   affiche deux cartes par ligne sur un écran large. #}
-                <div class="row dashboard-grid">
-                    {% for article in publishedArticles %}
-                        <div class="col-12 col-lg-6">
-                            {{ include('article/_dashboard_card.html.twig', {article: article, showAuthor: true}) }}
-                        </div>
-                    {% else %}
-                        <p class="empty-state">Aucun article publié.</p>
-                    {% endfor %}
-                </div>
-            </section>
+			{# Zone : publications appartenant à l’administrateur connecté. #}
+			<section class="dashboard-section" aria-labelledby="admin-published-title">
+				<h2 id="admin-published-title">Mes articles publiés</h2>
+				{# Grille Bootstrap : col-12 empile sur mobile et col-lg-6
+				                   affiche deux cartes par ligne sur un écran large. #}
+				<div class="row dashboard-grid">
+					{% for article in publishedArticles %}
+						<div class="col-12 col-lg-6">
+							{{ include('article/_dashboard_card.html.twig', {article: article, showAuthor: true}) }}
+						</div>
+					{% else %}
+						<p class="empty-state">Vous n’avez aucun article publié.</p>
+					{% endfor %}
+				</div>
+			</section>
 
-            {# Zone : brouillons de tous les auteurs. #}
-            <section class="dashboard-section" aria-labelledby="admin-drafts-title">
-                <h2 id="admin-drafts-title">Brouillons</h2>
-                <div class="row dashboard-grid">
-                    {% for article in draftArticles %}
-                        <div class="col-12 col-lg-6">
-                            {{ include('article/_dashboard_card.html.twig', {article: article, showAuthor: true}) }}
-                        </div>
-                    {% else %}
-                        <p class="empty-state">Aucun brouillon.</p>
-                    {% endfor %}
-                </div>
-            </section>
-        </div>
-    </main>
+			{# Zone : brouillons appartenant à l’administrateur connecté. #}
+			<section class="dashboard-section" aria-labelledby="admin-drafts-title">
+				<h2 id="admin-drafts-title">Mes brouillons</h2>
+				<div class="row dashboard-grid">
+					{% for article in draftArticles %}
+						<div class="col-12 col-lg-6">
+							{{ include('article/_dashboard_card.html.twig', {article: article, showAuthor: true}) }}
+						</div>
+					{% else %}
+						<p class="empty-state">Vous n’avez aucun brouillon.</p>
+					{% endfor %}
+				</div>
+			</section>
+		</div>
+	</main>
 {% endblock %}

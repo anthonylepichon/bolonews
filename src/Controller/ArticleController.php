@@ -196,8 +196,11 @@ final class ArticleController extends AbstractController
 
             $this->addFlash('success', $message);
 
+            // Chaque rôle revient dans son espace personnel après la création.
             return $this->redirectToRoute(
-                'app_profile_index'
+                $this->isGranted('ROLE_ADMIN')
+                    ? 'app_admin'
+                    : 'app_profile_index'
             );
         }
 
@@ -331,8 +334,12 @@ final class ArticleController extends AbstractController
 
             $this->addFlash('success', $message);
 
+            // L’administrateur retrouve « Mes articles » ; un utilisateur
+            // classique revient dans son espace personnel.
             return $this->redirectToRoute(
-                'app_profile_index'
+                $this->isGranted('ROLE_ADMIN')
+                    ? 'app_admin'
+                    : 'app_profile_index'
             );
         }
 
@@ -455,7 +462,7 @@ final class ArticleController extends AbstractController
             );
 
             return $this->redirectToRoute(
-                'app_admin',
+                'app_admin_article_index',
                 [],
                 Response::HTTP_SEE_OTHER
             );
@@ -470,7 +477,7 @@ final class ArticleController extends AbstractController
         );
 
         return $this->redirectToRoute(
-            'app_admin',
+            'app_admin_article_index',
             [],
             Response::HTTP_SEE_OTHER
         );

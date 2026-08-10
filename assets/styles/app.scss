@@ -1402,7 +1402,7 @@ h6 {
     border-radius: 0.875rem;
 }
 
-// Gestion des utilisateurs et des catégories --------------------------------
+// Gestion des articles, des utilisateurs et des catégories ------------------
 
 // Les modales et table-responsive restent des composants Bootstrap. Les classes
 // management-* et category-* ajoutent la mise en page métier et l'édition en ligne.
@@ -1418,6 +1418,12 @@ h6 {
 .management-card {
     width: 100%;
     min-height: 47.5rem;
+}
+
+.management-card--articles {
+    // La hauteur dépend du nombre réel d’articles : aucun grand espace vide
+    // n’est imposé lorsque la liste de modération contient peu de lignes.
+    min-height: 0;
 }
 
 .management-card > p {
@@ -1521,8 +1527,39 @@ h6 {
     gap: 0.75rem;
 }
 
+.management-actions {
+    // Les deux actions peuvent passer sur une seconde ligne si la largeur du
+    // tableau devient insuffisante, sans déborder de leur cellule.
+    flex-wrap: wrap;
+}
+
 .management-actions .btn {
     white-space: nowrap;
+}
+
+.management-table--articles th:nth-child(3),
+.management-table--articles td:nth-child(3) {
+    min-width: 18rem;
+}
+
+.management-table--articles th:last-child,
+.management-table--articles td:last-child {
+    min-width: 17rem;
+}
+
+.management-article-title {
+    color: var(--color-text-default);
+    font-family: $headings-font-family;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.management-article-title:hover,
+.management-article-title:focus-visible {
+    text-decoration: underline;
+    text-decoration-color: var(--color-background-accent);
+    text-decoration-thickness: 0.1875rem;
+    text-underline-offset: 0.25rem;
 }
 
 .management-back {

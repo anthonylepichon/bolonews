@@ -1,0 +1,147 @@
+{# Présentation : interface de modération de tous les articles.
+   Rôle : identifier l’auteur de chaque article puis confirmer sa dépublication ou sa suppression. #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des articles - Bolonews{% endblock %}
+
+{% block body %}
+    {# Zone : contenu principal de la gestion des articles. #}
+    <main>
+        {# Zone : en-tête présentant la modération éditoriale. #}
+        <header class="home-masthead">
+            <h1 class="home-masthead__title">Bolonews</h1>
+            <p class="home-masthead__subtitle">Contrôlez les publications proposées sur Bolonews.</p>
+        </header>
+
+        {# Zone : navigation entre les différentes rubriques administratives. #}
+        <div class="container management-page-content">
+            <nav class="dashboard-admin-nav" aria-label="Gestion de l’administration">
+                <a class="btn btn-outline-primary" href="{{ path('app_admin') }}">Mes articles</a>
+                <a class="btn btn-outline-primary" aria-current="page" href="{{ path('app_admin_article_index') }}">Tous les articles</a>
+                <a class="btn btn-outline-primary" href="{{ path('app_admin_category_index') }}">Catégories</a>
+                <a class="btn btn-outline-primary" href="{{ path('app_admin_user_index') }}">Utilisateurs</a>
+                <a class="btn btn-outline-primary" href="{{ path('app_profile_edit') }}">Mon profil</a>
+            </nav>
+
+            {# Zone : carte et tableau de tous les articles. #}
+            <section class="management-card management-card--articles" aria-labelledby="articles-management-title">
+                <h2 id="articles-management-title">Gestion des articles</h2>
+                <p>{{ articles|length }} article(s) affiché(s)</p>
+
+                {# table-responsive est un composant Bootstrap : sur un petit
+                   écran, le tableau défile horizontalement sans être tronqué. #}
+                <div class="table-responsive management-table-wrapper">
+                    <table class="management-table management-table--articles">
+                        <caption class="visually-hidden">Liste de tous les articles Bolonews</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Nom</th>
+                                <th scope="col">Adresse e-mail</th>
+                                <th scope="col">Titre de l’article</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for article in articles %}
+                                <tr>
+                                    <td>
+                                        {# Zone : avatar et pseudonyme de l’auteur. #}
+                                        <div class="management-user">
+                                            {% if article.author and article.author.avatarFilename %}
+                                                <img class="comment-avatar" src="{{ asset('images/avatars/' ~ article.author.avatarFilename) }}" alt="Avatar de {{ article.author.pseudo }}">
+                                            {% elseif article.author %}
+                                                <span class="comment-avatar" aria-hidden="true">{{ article.author.pseudo|slice(0, 2)|upper }}</span>
+                                            {% else %}
+                                                <span class="comment-avatar" aria-hidden="true">AS</span>
+                                            {% endif %}
+
+                                            <span>{{ article.author ? article.author.pseudo : 'Auteur supprimé' }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ article.author ? article.author.email : '—' }}</td>
+                                    <td>
+                                        <a class="management-article-title" href="{{ path('app_article_show', {id: article.id}) }}">
+                                            {{ article.title }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {# Les boutons n’exécutent pas directement l’action :
+                                           les attributs Bootstrap ouvrent une confirmation. #}
+                                        <div class="management-actions">
+                                            {% if article.isPublished %}
+                                                <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#unpublish-article-{{ article.id }}">
+                                                    Dépublier
+                                                </button>
+                                            {% endif %}
+
+                                            <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#delete-article-{{ article.id }}">
+                                                Supprimer
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4">Aucun article n’est actuellement enregistré.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            {# Zone : retour vers les articles personnels de l’administrateur. #}
+            <a class="btn btn-outline-primary management-back" href="{{ path('app_admin') }}">Retour à mes articles</a>
+        </div>
+    </main>
+
+    {% for article in articles %}
+        {% if article.isPublished %}
+            {# Zone : confirmation de la dépublication. La requête POST est
+               protégée par un jeton CSRF propre à l’article. #}
+            <div class="modal fade" id="unpublish-article-{{ article.id }}" tabindex="-1" aria-labelledby="unpublish-article-title-{{ article.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="modal-title fs-5" id="unpublish-article-title-{{ article.id }}">Dépublier l’article « {{ article.title }} » ?</h2>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-0">L’article ne sera plus visible publiquement et deviendra un brouillon.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Annuler</button>
+                            <form method="post" action="{{ path('app_admin_article_unpublish', {id: article.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('unpublish-article' ~ article.id) }}">
+                                <button class="btn btn-primary" type="submit">Dépublier</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {# Zone : confirmation de la suppression définitive. La modale utilise
+           le composant Bootstrap Modal et un formulaire POST protégé par CSRF. #}
+        <div class="modal fade" id="delete-article-{{ article.id }}" tabindex="-1" aria-labelledby="delete-article-title-{{ article.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="delete-article-title-{{ article.id }}">Supprimer définitivement l’article « {{ article.title }} » ?</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-0">Cette action est irréversible.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Annuler</button>
+                        <form method="post" action="{{ path('app_article_delete', {id: article.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete-article' ~ article.id) }}">
+                            <button class="btn btn-danger" type="submit">Supprimer l’article</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}
