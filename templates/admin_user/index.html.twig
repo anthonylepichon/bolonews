@@ -1,5 +1,5 @@
 {# Présentation : interface d'administration des utilisateurs.
-   Rôle : rechercher les comptes et confirmer leur bannissement, réactivation ou suppression. #}
+   Rôle : rechercher les comptes et confirmer leur bannissement ou leur réactivation. #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Gestion des utilisateurs - Bolonews{% endblock %}
@@ -71,11 +71,10 @@
                                     </td>
                                     <td>
                                         {% if 'ROLE_ADMIN' not in user.roles %}
-                                            {# Ces boutons n'envoient rien directement : les
+                                            {# Ce bouton n'envoie rien directement : les
                                                attributs data-bs-* ouvrent la bonne modale. #}
                                             <div class="management-actions">
                                                 <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#ban-user-{{ user.id }}">{{ user.isBanned ? 'Réactiver' : 'Bannir' }}</button>
-                                                <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#delete-user-{{ user.id }}">Supprimer</button>
                                             </div>
                                         {% else %}
                                             <span class="text-muted">Compte protégé</span>
@@ -97,9 +96,9 @@
 
     {% for user in users %}
         {% if 'ROLE_ADMIN' not in user.roles %}
-            {# Zone : confirmations de bannissement et de suppression du compte.
-               Une paire de modales Bootstrap est générée avec un id unique par
-               compte. Chaque confirmation envoie un POST protégé par CSRF. #}
+            {# Zone : confirmation du bannissement ou de la réactivation.
+               Une modale Bootstrap est générée avec un id unique par compte.
+               La confirmation envoie un POST protégé par CSRF. #}
             <div class="modal fade" id="ban-user-{{ user.id }}" tabindex="-1" aria-labelledby="ban-user-title-{{ user.id }}" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
                     <div class="modal-header">
@@ -117,22 +116,6 @@
                 </div></div>
             </div>
 
-            <div class="modal fade" id="delete-user-{{ user.id }}" tabindex="-1" aria-labelledby="delete-user-title-{{ user.id }}" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title fs-5" id="delete-user-title-{{ user.id }}">Supprimer le compte « {{ user.pseudo }} » ?</h2>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                    </div>
-                    <div class="modal-body"><p class="mb-0"><strong>Cette action est irréversible.</strong></p></div>
-                    <div class="modal-footer">
-                        <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Annuler</button>
-                        <form method="post" action="{{ path('app_admin_user_delete', {id: user.id}) }}">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete-user' ~ user.id) }}">
-                            <button class="btn btn-danger" type="submit">Supprimer le compte</button>
-                        </form>
-                    </div>
-                </div></div>
-            </div>
         {% endif %}
     {% endfor %}
 {% endblock %}

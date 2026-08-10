@@ -29,7 +29,7 @@ Le projet met en pratique la conception d’une application selon l’architectu
 - consultation et modération des articles ;
 - publication, dépublication et suppression d’un article ;
 - recherche et gestion des comptes utilisateurs ;
-- bannissement, réactivation ou suppression d’un compte selon les droits ;
+- bannissement ou réactivation d’un compte sans supprimer ses données ;
 - création, modification et suppression des catégories.
 
 ## Technologies utilisées

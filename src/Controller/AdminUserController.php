@@ -2,7 +2,7 @@
 
 /*
  * Présentation : contrôleur d'administration des comptes utilisateurs.
- * Rôle : rechercher, bannir, réactiver ou supprimer un compte selon les règles de sécurité.
+ * Rôle : rechercher, bannir ou réactiver un compte selon les règles de sécurité.
  */
 
 namespace App\Controller;
@@ -125,69 +125,6 @@ final class AdminUserController extends AbstractController
             : 'Le compte a bien été réactivé.';
 
         $this->addFlash('success', $message);
-
-        return $this->redirectToRoute(
-            'app_admin_user_index',
-            [],
-            Response::HTTP_SEE_OTHER
-        );
-    }
-
-    #[Route(
-        '/{id}',
-        name: 'delete',
-        requirements: ['id' => '\d+'],
-        methods: ['POST']
-    )]
-    /**
-     * Rôle : Supprime définitivement un compte utilisateur autorisé.
-     * Paramètre : `$request` (Request) : la requête HTTP et les données envoyées ; `$targetUser` (User) : le compte ciblé par l’administration ; `$entityManager` (EntityManagerInterface) : le gestionnaire Doctrine chargé de la persistance.
-     * Retour : Une réponse HTTP contenant la page ou la redirection.
-     */
-    public function delete(
-        Request $request,
-        User $targetUser,
-        EntityManagerInterface $entityManager
-    ): Response {
-        $tokenIsValid = $this->isCsrfTokenValid(
-            'delete-user'.$targetUser->getId(),
-            $request->getPayload()->getString('_token')
-        );
-
-        if (!$tokenIsValid) {
-            $this->addFlash(
-                'error',
-                'La demande de suppression est invalide.'
-            );
-
-            return $this->redirectToRoute(
-                'app_admin_user_index',
-                [],
-                Response::HTTP_SEE_OTHER
-            );
-        }
-
-        // La même protection est appliquée à la suppression définitive.
-        if ($this->isProtectedAccount($targetUser)) {
-            $this->addFlash(
-                'error',
-                'Un compte administrateur ne peut pas être supprimé.'
-            );
-
-            return $this->redirectToRoute(
-                'app_admin_user_index',
-                [],
-                Response::HTTP_SEE_OTHER
-            );
-        }
-
-        $entityManager->remove($targetUser);
-        $entityManager->flush();
-
-        $this->addFlash(
-            'success',
-            'Le compte utilisateur a bien été supprimé.'
-        );
 
         return $this->redirectToRoute(
             'app_admin_user_index',
