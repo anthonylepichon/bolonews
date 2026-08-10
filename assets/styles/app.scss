@@ -106,6 +106,8 @@ h6 {
 }
 
 .site-header .navbar {
+    // La barre sert de repère au positionnement centré du menu sur ordinateur.
+    position: relative;
     min-height: 5rem;
     padding: 0.75rem 4rem;
     background-color: var(--color-background-default);
@@ -863,6 +865,19 @@ h6 {
 .comment-form textarea:focus {
     border-color: var(--color-background-accent);
     box-shadow: 0 0 0 0.2rem rgb(238 217 32 / 25%);
+}
+
+@media (min-width: 992px) {
+    .site-main-nav {
+        // Le menu est retiré du flux flex de Bootstrap puis centré par rapport
+        // à toute la navbar. La largeur différente du logo et du compte ne
+        // peut ainsi plus décaler Accueil, Articles et Contact.
+        position: absolute;
+        left: 50%;
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+        transform: translateX(-50%);
+    }
 }
 
 @media (max-width: 991.98px) {
