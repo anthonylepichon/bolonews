@@ -28,23 +28,23 @@
                         <a class="btn btn-primary" href="{{ path('app_home') }}">
                             Retour à l’accueil
                         </a>
-                    {# Zone : formulaire de déconnexion POST protégé par CSRF.
-                       Turbo reste désactivé pour cette action de sécurité. #}
-                    <form
-                        action="{{ path('app_logout') }}"
-                        method="post"
-                        data-turbo="false"
-                    >
-                        <input
-                            type="hidden"
-                            name="_csrf_token"
-                            value="{{ csrf_token('logout') }}"
+                        {# Zone : formulaire de déconnexion POST protégé par CSRF.
+                           Turbo reste désactivé pour cette action de sécurité. #}
+                        <form
+                            action="{{ path('app_logout') }}"
+                            method="post"
+                            data-turbo="false"
                         >
-                        <button class="btn btn-outline-primary" type="submit">
-                            Me déconnecter
-                        </button>
-                    </form>
-                </div>
+                            <input
+                                type="hidden"
+                                name="_csrf_token"
+                                value="{{ csrf_token('logout') }}"
+                            >
+                            <button class="btn btn-outline-primary" type="submit">
+                                Me déconnecter
+                            </button>
+                        </form>
+                    </div>
                 </section>
             {% else %}
                 {# Zone : carte de connexion présentée aux visiteurs. #}
