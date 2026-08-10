@@ -8,9 +8,9 @@ Le projet met en pratique la conception d’une application selon l’architectu
 
 ### Partie publique
 
-- consultation de la page d’accueil et des derniers articles publiés ;
+- consultation de la page d’accueil avec articles mis en avant et derniers articles publiés ;
 - consultation de la liste et du détail des articles ;
-- recherche et filtrage des articles par catégorie ;
+- recherche par mots clés et filtrage des articles par catégorie ;
 - consultation des commentaires et du nombre de mentions « J’aime » ;
 - affichage d’une page de contact ;
 - création d’un compte et connexion.
@@ -41,9 +41,9 @@ Le projet met en pratique la conception d’une application selon l’architectu
 - **Twig** ;
 - **Symfony Form**, Validator et Security ;
 - **Bootstrap 5.3.8** ;
-- **SCSS** avec SymfonyCasts SassBundle ;
-- **JavaScript**, AJAX, Stimulus et Symfony UX Turbo ;
-- **AssetMapper**, sans npm.
+- **SCSS** avec SymfonyCasts SassBundle (expérimentation) ;
+- **JavaScript**, AJAX, Stimulus (expérimentation) et Symfony UX Turbo(expérimentation) ;
+- **AssetMapper**, sans npm !(expérimentation)
 
 ## Architecture et modèle de données
 
@@ -208,5 +208,5 @@ Bolonews est un projet pédagogique. La page de contact est actuellement une vue
 
 ## Auteur
 
-**Anthony LE PICHON**  
+**Anthony LE PICHON**
 Projet Symfony créé dans le cadre d’une formation Développeur Web Full Stack — Niveau 5 (Bac+2).
