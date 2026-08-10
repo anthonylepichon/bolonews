@@ -40,7 +40,7 @@ Le projet met en pratique la conception d’une application selon l’architectu
 - **MySQL 8.4** ;
 - **Twig** ;
 - **Symfony Form**, Validator et Security ;
-- **Bootstrap 5.3.8** ;
+- **Bootstrap 5.3.8** (expérimentation) ;
 - **SCSS** avec SymfonyCasts SassBundle (expérimentation) ;
 - **JavaScript**, AJAX, Stimulus (expérimentation) et Symfony UX Turbo(expérimentation) ;
 - **AssetMapper**, sans npm !(expérimentation)
