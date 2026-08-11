@@ -14,14 +14,14 @@ jobs:
         steps:
             - name: Configurer la clé SSH
               env:
-                  SSH_PRIVATE_KEY: ${{ secrets.OVH_SSH_KEY }}
+                  SSH_PRIVATE_KEY_B64: ${{ secrets.OVH_SSH_KEY_B64 }}
                   OVH_HOST: ${{ secrets.OVH_HOST }}
                   OVH_PORT: ${{ secrets.OVH_PORT }}
               run: |
                   mkdir -p ~/.ssh
                   chmod 700 ~/.ssh
 
-                  echo "$SSH_PRIVATE_KEY" > ~/.ssh/bolonews_ovh
+                  echo "$SSH_PRIVATE_KEY_B64" | base64 -d > ~/.ssh/bolonews_ovh
                   chmod 600 ~/.ssh/bolonews_ovh
 
                   ssh-keyscan -p "$OVH_PORT" "$OVH_HOST" >> ~/.ssh/known_hosts
