@@ -2,4 +2,6 @@
 # Rôle : déclarer app.scss comme feuille racine contenant Bootstrap et les styles Bolonews.
 symfonycasts_sass:
     root_sass:
-        - 'assets/styles/app.scss'
+        - "assets/styles/app.scss"
+
+    search_for_binary: false
