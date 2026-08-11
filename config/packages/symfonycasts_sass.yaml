@@ -4,4 +4,3 @@ symfonycasts_sass:
     root_sass:
         - "assets/styles/app.scss"
 
-    search_for_binary: false

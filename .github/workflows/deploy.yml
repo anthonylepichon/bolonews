@@ -1,0 +1,70 @@
+name: Deploy Bolonews to OVH
+
+on:
+    push:
+        branches:
+            - main
+
+    workflow_dispatch:
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Configurer la clé SSH
+              env:
+                  SSH_PRIVATE_KEY: ${{ secrets.OVH_SSH_KEY }}
+                  OVH_HOST: ${{ secrets.OVH_HOST }}
+                  OVH_PORT: ${{ secrets.OVH_PORT }}
+              run: |
+                  mkdir -p ~/.ssh
+                  chmod 700 ~/.ssh
+
+                  echo "$SSH_PRIVATE_KEY" > ~/.ssh/bolonews_ovh
+                  chmod 600 ~/.ssh/bolonews_ovh
+
+                  ssh-keyscan -p "$OVH_PORT" "$OVH_HOST" >> ~/.ssh/known_hosts
+
+            - name: Déployer Bolonews sur OVH
+              env:
+                  OVH_HOST: ${{ secrets.OVH_HOST }}
+                  OVH_USER: ${{ secrets.OVH_USER }}
+                  OVH_PORT: ${{ secrets.OVH_PORT }}
+              run: |
+                  ssh \
+                    -i ~/.ssh/bolonews_ovh \
+                    -p "$OVH_PORT" \
+                    "$OVH_USER@$OVH_HOST" << 'EOF'
+
+                    set -e
+
+                    cd ~/bolonews
+
+                    echo "=== Récupération du code ==="
+                    git fetch origin
+                    git reset --hard origin/main
+
+                    echo "=== Installation Composer ==="
+                    APP_ENV=prod APP_DEBUG=0 php ~/composer.phar install \
+                      --no-dev \
+                      --optimize-autoloader \
+                      --ignore-platform-req=ext-redis
+
+                    echo "=== Compilation Sass ==="
+                    APP_ENV=prod APP_DEBUG=0 php bin/console sass:build
+
+                    echo "=== Compilation AssetMapper ==="
+                    APP_ENV=prod APP_DEBUG=0 php bin/console asset-map:compile
+
+                    echo "=== Migrations Doctrine ==="
+                    APP_ENV=prod APP_DEBUG=0 php bin/console doctrine:migrations:migrate \
+                      --no-interaction \
+                      --allow-no-migration
+
+                    echo "=== Nettoyage du cache ==="
+                    APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear
+
+                    echo "=== Déploiement terminé ==="
+
+                  EOF
