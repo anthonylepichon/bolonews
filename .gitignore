@@ -26,8 +26,6 @@
 /public/assets/
 ###< symfonycasts/sass-bundle ###
 
-AGENTS.md
+/AGENTS.md
 
-documents\cours
-documents\audit
-documents/rapport/
+/documents
