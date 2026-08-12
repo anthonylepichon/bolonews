@@ -41,29 +41,44 @@ jobs:
 
                     cd ~/bolonews
 
+                                        PHP_BIN="/usr/local/php8.4/bin/php"
+
+                    if [ ! -x "$PHP_BIN" ]; then
+                      echo "Erreur : PHP 8.4 est introuvable à $PHP_BIN"
+                      echo "Exécutables PHP disponibles sur le serveur :"
+                      ls -1 /usr/local/php*/bin/php 2>/dev/null || true
+                      exit 1
+                    fi
+
+                    export APP_ENV=prod
+                    export APP_DEBUG=0
+
+                    echo "=== Version PHP utilisée ==="
+                    "$PHP_BIN" --version
+
                     echo "=== Récupération du code ==="
                     git fetch origin
                     git reset --hard origin/main
 
                     echo "=== Installation Composer ==="
-                    APP_ENV=prod APP_DEBUG=0 php ~/composer.phar install \
+                    "$PHP_BIN" "$HOME/composer.phar" install \
                       --no-dev \
                       --optimize-autoloader \
                       --ignore-platform-req=ext-redis
 
                     echo "=== Compilation Sass ==="
-                    APP_ENV=prod APP_DEBUG=0 php bin/console sass:build
+                    "$PHP_BIN" bin/console sass:build
 
                     echo "=== Compilation AssetMapper ==="
-                    APP_ENV=prod APP_DEBUG=0 php bin/console asset-map:compile
+                    "$PHP_BIN" bin/console asset-map:compile
 
                     echo "=== Migrations Doctrine ==="
-                    APP_ENV=prod APP_DEBUG=0 php bin/console doctrine:migrations:migrate \
+                    "$PHP_BIN" bin/console doctrine:migrations:migrate \
                       --no-interaction \
                       --allow-no-migration
 
                     echo "=== Nettoyage du cache ==="
-                    APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear
+                    "$PHP_BIN" bin/console cache:clear
 
                     echo "=== Déploiement terminé ==="
 
